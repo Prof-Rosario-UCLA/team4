@@ -1,0 +1,21 @@
+{
+  "name": "oversea",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "concurrently \"npm run server\" \"npm run client\" \"npm run ai-service\"",
+    "server": "cd server && npm run dev",
+    "client": "cd client && npm run dev",
+    "ai-service": "cd ai-service && source venv/bin/activate && uvicorn api_server:app --reload",
+    "install-all": "npm install && cd server && npm install && cd ../frontend && npm install"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "axios": "^1.9.0",
+    "concurrently": "^9.1.2",
+    "react-icons": "^5.5.0"
+  }
+}
