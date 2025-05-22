@@ -1,6 +1,5 @@
-# 🧠 team4 – CS144 Final Project
+# team4 – CS144 Final Project
 
-This project features an AI-powered travel planner with a Python-based agent, a Node.js server, and a Vite-based client. Follow the steps below to get everything running locally.
 
 ## 🛠️ Setup Instructions
 
