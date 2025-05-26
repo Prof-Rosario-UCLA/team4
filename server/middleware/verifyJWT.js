@@ -1,24 +1,40 @@
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import User from "../model/user.model.js";
 
 dotenv.config();
 
 /*
 Purpose:
-Middleware tha runs before protected routes
+Middleware that runs before protected routes
 Verifies the access token sent in Authorization: Bearer <token> header
 */
-export function verifyJWT(req, res, next) {
+export async function verifyJWT(req, res, next) {
   const authHeader = req.headers["authorization"];
-  if (!authHeader) return res.sendStatus(401); // Unauthorize
-
-  console.log(authHeader); // Bearer token
+  if (!authHeader) return res.sendStatus(401); // Unauthorized
 
   const token = authHeader.split(" ")[1];
 
-  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
-    if (err) return res.sendStatus(403); // Forbidden - invalid token
-    req.user = decoded.username;
+  try {
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    console.log("USERNAME: ", decoded.username);
+
+    const user = await User.findOne({ username: decoded.username });
+    if (!user) {
+      console.log("User not found in database");
+      return res.sendStatus(403); // Forbidden - user not found
+    }
+
+    console.log("USER ID: ", user._id);
+    // Set both the user ID and username in req.user
+    req.user = {
+      _id: user._id,
+      username: user.username,
+    };
+
     next();
-  });
+  } catch (err) {
+    console.error("JWT verification error: ", err);
+    return res.sendStatus(403); // Forbidden - invalid token
+  }
 }

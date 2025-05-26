@@ -1,4 +1,3 @@
-import "../auth.css";
 import { useRef, useState, useEffect } from "react";
 import axios from "../api/axios.js";
 import useAuth from "../hooks/useAuth.jsx";
@@ -11,7 +10,7 @@ const Login = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location?.state?.from?.pathname || "/";
+  const from = location?.state?.from?.pathname || "/agent";
 
   // To make focus on user and error messages
   const userRef = useRef();
@@ -69,46 +68,61 @@ const Login = () => {
   };
 
   return (
-    <section>
-      <p
-        ref={errRef}
-        className={errMsg ? "errmsg" : "offscreen"}
-        aria-live="assertive"
-      >
-        {errMsg}
-      </p>
-      <h1>Sign In</h1>
-      <form onSubmit={handleSubmit}>
-        <label htmlFor="username">Username:</label>
-        <input
-          type="text"
-          id="username"
-          ref={userRef}
-          autoComplete="off"
-          onChange={(e) => setUser(e.target.value)}
-          value={user}
-          required
-          className="border border-black"
-        />
-        <label htmlFor="password">Password:</label>
-        <input
-          type="password"
-          id="password"
-          onChange={(e) => setPwd(e.target.value)}
-          value={pwd}
-          className="border border-black"
-        />
-        <button className="border border-black">Sign In</button>
-      </form>
-      <p>
-        Need an Accout?
-        <br />
-        <span className="line">
-          {/* Put router link here */}
-          <Link to="/register">Sign Up</Link>
-        </span>
-      </p>
-    </section>
+    <div className="min-h-screen flex items-center justify-center">
+      <section className="w-full max-w-xs min-h-[300px] flex flex-col p-4">
+        <p
+          ref={errRef}
+          className={
+            errMsg
+              ? "bg-pink-200 text-red-800 font-bold rounded p-2 text-center mb-2"
+              : "absolute left-[-9999px]"
+          }
+          aria-live="assertive"
+        >
+          {errMsg}
+        </p>
+
+        <h1 className="mb-6 text-3xl font-bold text-center text-black">
+          Login
+        </h1>
+
+        <form onSubmit={handleSubmit} className="flex flex-col flex-grow">
+          <input
+            type="text"
+            id="username"
+            ref={userRef}
+            autoComplete="off"
+            onChange={(e) => setUser(e.target.value)}
+            value={user}
+            placeholder="Username"
+            required
+            className="border border-black rounded-xl p-2 mb-4 text-base"
+          />
+          <input
+            type="password"
+            id="password"
+            onChange={(e) => setPwd(e.target.value)}
+            value={pwd}
+            placeholder="Password"
+            className="border border-black rounded-xl p-2 mb-4 text-base"
+          />
+          <button className="bg-black text-white rounded-xl p-2 text-base">
+            Sign In
+          </button>
+        </form>
+        <p className="text-base text-center mt-4">
+          Don't have an account?
+          <span className="inline-block ml-2">
+            <Link
+              to="/register"
+              className="text-base text-blue-500 hover:underline"
+            >
+              Sign Up
+            </Link>
+          </span>
+        </p>
+      </section>
+    </div>
   );
 };
 

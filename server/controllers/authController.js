@@ -21,23 +21,31 @@ export async function handleLogin(req, res) {
   if (match) {
     // Create JWTs
     const accessToken = jwt.sign(
-        { "username": foundUser.username },
-        process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn: '30s' }    // 5miniutes/15minutes would be best
-    )
+      {
+        username: foundUser.username,
+        userId: foundUser._id.toString(),
+      },
+      process.env.ACCESS_TOKEN_SECRET,
+      { expiresIn: "30m" }
+    );
 
     const refreshToken = jwt.sign(
-        { "username": foundUser.username },
-        process.env.REFRESH_TOKEN_SECRET,
-        { expiresIn: '1d' }
-    )
+      { username: foundUser.username },
+      process.env.REFRESH_TOKEN_SECRET,
+      { expiresIn: "1d" }
+    );
 
     // Store the current refreshtoken in to the correspond user in MongoDB
     foundUser.refreshToken = refreshToken;
     await foundUser.save();
 
     // Store the refreshtoken also in http-only cookie
-    res.cookie('jwt', refreshToken, { httpOnly: true, samSite: 'None', secure: true, maxAge: 24 * 60 * 60 * 1000  })
+    res.cookie("jwt", refreshToken, {
+      httpOnly: true,
+      samSite: "None",
+      secure: true,
+      maxAge: 5 * 1000, // 5 seconds in milliseconds
+    });
 
     res.json({ accessToken });
   } else {

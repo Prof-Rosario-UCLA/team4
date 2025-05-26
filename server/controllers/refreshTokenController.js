@@ -15,31 +15,33 @@ Checks if it exists and matches a user in the DB
 Verifies it with the secret
 Issues a fresh access token if all valid
 */
-export async function handleRefreshToken (req, res) {
+export async function handleRefreshToken(req, res) {
   const cookies = req.cookies;
-  if (!cookies?.jwt)    // If we have cookies and if theres a jwt token
+  if (!cookies?.jwt)
+    // If we have cookies and if theres a jwt token
     return res.sendStatus(401);
-
-  console.log(cookies.jwt);
 
   const refreshToken = cookies.jwt;
 
-  // Check if refresh token already exist in the db or not
-  const foundUser = await User.findOne({ refreshToken: refreshToken });
-  if (!foundUser) return res.sendStatus(403); // Forbidden
+  try {
+    const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
 
-  // Verify the refresh token. Send an access token if refresh token is valid
-  jwt.verify(
-    refreshToken,
-    process.env.REFRESH_TOKEN_SECRET,
-    (err, decoded) => {
-        if (err || foundUser.username !== decoded.username) return res.sendStatus(403);
-        const accessToken = jwt.sign(
-            { "username": decoded.username },
-            process.env.ACCESS_TOKEN_SECRET,
-            { expiresIn: '30s' }
-        );
-        res.json({ accessToken });
-    }
-  );
+    // Check if refresh token already exist in the db or not
+    const foundUser = await User.findOne({
+      username: decoded.username,
+      refreshToken: refreshToken,
+    });
+    if (!foundUser) return res.sendStatus(403); // Forbidden
+
+    const accessToken = jwt.sign(
+      { username: decoded.username, userId: foundUser._id.toString() },
+      process.env.ACCESS_TOKEN_SECRET,
+      { expiresIn: "30m" }
+    );
+
+    res.json({ accessToken });
+  } catch (err) {
+    console.error("Refresh token error:", err);
+    return res.sendStatus(403);
+  }
 }
