@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
-import axios from "../api/axios";
-import useRefreshToken from "../hooks/useRefreshToken.jsx";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const Users = () => {
   const [users, setUsers] = useState();
-  const refresh = useRefreshToken();
+  const axiosPrivate = useAxiosPrivate();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     let isMounted = true;
@@ -12,39 +14,41 @@ const Users = () => {
 
     const getUsers = async () => {
       try {
-        const response = await axios.get("/api/user", {
-            signal: controller.signal
+        const response = await axiosPrivate.get("/api/user", {
+          signal: controller.signal,
         });
         console.log(response.data);
         isMounted && setUsers(response.data);
       } catch (err) {
+        // Don't navigate to login if the request was just canceled
+        if (err.name === "CanceledError") {
+          console.log("Request was canceled");
+          return;
+        }
         console.error(err);
+        navigate("/login", { state: { from: location }, replace: true });
       }
     };
     getUsers();
 
     return () => {
-        isMounted = false;
-        controller.abort();
-    }
-  });
+      isMounted = false;
+      controller.abort();
+    };
+  }, []);
 
-  return(
+  return (
     <article>
       <h2>Users List</h2>
       {users?.length ? (
         <ul>
-          {users.map((user, idx) => 
+          {users.map((user, idx) => (
             <li key={idx}>{user?.username}</li>
-          )}
+          ))}
         </ul>
       ) : (
         <p>No users to display</p>
       )}
-      <button onClick={() => refresh()}>
-        Refresh
-        <br />
-      </button>
     </article>
   );
 };

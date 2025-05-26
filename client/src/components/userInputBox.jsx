@@ -18,7 +18,7 @@ const UserInputBox = ({
   }, [value]);
 
   return (
-    <div className="fixed bottom-0 left-0 right-4 z-20 pb-9 px-5 md:left-56 ">
+    <div className="fixed bottom-0 left-0 right-0 z-20 pb-9 px-5 md:left-56 ">
       <div className="mx-auto max-w-3xl w-full">
         <div className=" border border-gray-300 bg-white rounded-4xl px-6 py-3 shadow-sm">
           <textarea
