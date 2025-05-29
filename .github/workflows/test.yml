@@ -13,9 +13,6 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: node:23
-    defaults:
-      run:
-        working-directory: ${{ github.workspace }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -25,13 +22,24 @@ jobs:
         with:
           node-version: "23"
           cache: "npm"
-          cache-dependency-path: "package-lock.json"
+
+      - name: List directory contents
+        run: |
+          pwd
+          ls -la
+          echo "Current directory: $PWD"
 
       - name: Install dependencies
-        run: npm ci
+        run: |
+          cd $GITHUB_WORKSPACE
+          npm ci
 
       - name: Run tests
-        run: npm test
+        run: |
+          cd $GITHUB_WORKSPACE
+          npm test
 
       - name: Build project
-        run: npm run build
+        run: |
+          cd $GITHUB_WORKSPACE
+          npm run build
