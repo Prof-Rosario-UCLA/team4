@@ -1,6 +1,5 @@
 # team4 – CS144 Final Project
 
-
 ## 🛠️ Setup Instructions
 
 ```bash
@@ -48,3 +47,4 @@ npm install
 # -------------------------------
 cd ..
 npm install
+```

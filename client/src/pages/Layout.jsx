@@ -1,8 +1,12 @@
 import React, { useState } from "react";
 import { Outlet } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import OfflineFallback from '../components/OfflineFallback.jsx';
+import { useNetworkStatus } from "../hooks/useNetworkStatus.jsx";
+
 
 const Layout = () => {
+  const isOnline = useNetworkStatus();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const toggleSidebar = () => {
@@ -27,8 +31,8 @@ const Layout = () => {
 
         {/* Content */}
         {/* The outlet represents all children component inside it*/}
-        <main className="flex-1 overflow-y-auto overflow-x-hidden bg-white items-center justify-content px-5">
-          <Outlet />
+        <main className="flex-1 overflow-y-auto overflow-x-hidden bg-white items-center justify-content pt-1 px-5">
+          {isOnline ? <Outlet /> : <OfflineFallback />}
         </main>
       </div>
     </div>
