@@ -9,10 +9,10 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     container: 
-      image: node:20
+      image: node:23
     steps:
       - uses: actions/checkout@v3
         with:
-          node-version: 20
+          node-version: 23
       - run: npm ci  
       - run: npm run build
