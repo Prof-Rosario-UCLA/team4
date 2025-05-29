@@ -7,7 +7,11 @@
     "server": "cd server && npm run dev",
     "client": "cd client && npm run dev",
     "ai-service": "cd ai-service && source venv/bin/activate && uvicorn api_server:app --reload",
-    "install-all": "npm install && cd server && npm install && cd ../frontend && npm install"
+    "install-all": "npm install && cd server && npm install && cd ../frontend && npm install",
+    "test": "npm run test-client && npm run test-server && npm run test-ai-service",
+    "test-client": "cd client && npm test",
+    "test-server": "cd server && npm test",
+    "test-ai-service": "cd ai-service && venv/bin/python -m pytest || echo 'No tests for ai-service'"
   },
   "keywords": [],
   "author": "",

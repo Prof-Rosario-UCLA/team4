@@ -136,7 +136,9 @@ const AgentChatPage = () => {
           <div ref={bottomRef} />
         </div>
       ) : (
-        <p>No user log in!!</p>
+        <div className="w-full flex min-h-[30vh] items-center justify-center font-bold text-lg md:text-xl ">
+          <p >Sign in to start chatting with the Travel Agent!</p>
+        </div>
       )}
 
       <UserInputBox
