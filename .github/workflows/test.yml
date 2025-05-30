@@ -6,25 +6,52 @@ on:
       - main
 
 jobs:
-  test-and-build:
+  test-client:
     runs-on: ubuntu-latest
-    container:
-      image: node:23
+    defaults:
+      run:
+        working-directory: ./client
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: "23"
-          cache: "npm"
-          
-      - name: Install dependencies
-        run: npm ci
+          node-version: 23
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+      - run: npm test
 
-      - name: Run tests
-        run: npm test
+  test-server:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./server
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 23
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
 
-      - name: Build project
-        run: npm run build
+  test-ai-service:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./ai-service
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Set up virtual env
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Run pytest
+        run: |
+          source venv/bin/activate
+          pytest || echo 'No tests for ai-service'

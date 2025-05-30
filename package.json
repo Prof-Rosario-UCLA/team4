@@ -11,7 +11,10 @@
     "test": "npm run test-client && npm run test-server && npm run test-ai-service",
     "test-client": "cd client && npm test",
     "test-server": "cd server && npm test",
-    "test-ai-service": "cd ai-service && venv/bin/python -m pytest || echo 'No tests for ai-service'"
+    "test-ai-service": "cd ai-service && venv/bin/python -m pytest || echo 'No tests for ai-service'",
+    "build": "npm run build-client",
+    "build-client": "cd client && npm run build",
+    "build-server": "echo \"No build step for server\""
   },
   "keywords": [],
   "author": "",
