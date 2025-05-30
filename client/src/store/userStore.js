@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import useAxiosPrivate from "../hooks/useAxiosPrivate";
 
 const useUserStore = create((set) => ({
   users: [],
