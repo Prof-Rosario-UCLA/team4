@@ -4,7 +4,6 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon server.js",
-    "lint": "eslint .",
     "test": "echo \"No tests specified\" && exit 0"
   },
   "type": "module",
