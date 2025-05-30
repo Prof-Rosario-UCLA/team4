@@ -13,9 +13,16 @@ jobs:
         working-directory: ./client
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
       - uses: actions/setup-node@v4
         with:
           node-version: 23
+          cache: "npm"
       - run: npm ci
       - run: npm run lint
       - run: npm run build
@@ -28,9 +35,16 @@ jobs:
         working-directory: ./server
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
       - uses: actions/setup-node@v4
         with:
           node-version: 23
+          cache: "npm"
       - run: npm ci
       - run: npm test
 
@@ -41,9 +55,16 @@ jobs:
         working-directory: ./ai-service
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: "pip"
       - name: Set up virtual env
         run: |
           python -m venv venv
