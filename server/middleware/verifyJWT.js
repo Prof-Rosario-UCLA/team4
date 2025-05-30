@@ -17,19 +17,11 @@ export async function verifyJWT(req, res, next) {
 
   try {
     const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    console.log("USERNAME: ", decoded.username);
 
-    const user = await User.findOne({ username: decoded.username });
-    if (!user) {
-      console.log("User not found in database");
-      return res.sendStatus(403); // Forbidden - user not found
-    }
-
-    console.log("USER ID: ", user._id);
-    // Set both the user ID and username in req.user
+    // Use the userId from the token directly
     req.user = {
-      _id: user._id,
-      username: user.username,
+      _id: decoded.userId,
+      username: decoded.username,
     };
 
     next();
