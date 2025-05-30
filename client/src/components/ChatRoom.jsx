@@ -84,7 +84,7 @@ const ChatRoom = () => {
       socket.off("disconnect");
       socket.off("reconnect");
     };
-  }, []);
+  }, [username]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });

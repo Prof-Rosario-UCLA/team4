@@ -7,8 +7,7 @@ const useUserStore = create((set) => ({
   error: null,
 
   // Fetch all users
-  fetchUsers: async () => {
-    const axiosPrivate = useAxiosPrivate();
+  fetchUsers: async (axiosPrivate) => {
     set({ isLoading: true, error: null });
 
     try {

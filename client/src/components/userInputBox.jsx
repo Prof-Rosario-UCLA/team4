@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useEffect } from "react";
 import { BsArrowUpCircleFill } from "react-icons/bs";
 import RequireAuthButton from "./RequireAuthButton";
 
@@ -15,7 +15,7 @@ const UserInputBox = ({
       textareaRef.current.style.height = "auto";
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
     }
-  }, [value]);
+  }, [value, textareaRef]);
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-20 pb-9 px-5 md:left-56 ">
