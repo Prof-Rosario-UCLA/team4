@@ -1,9 +1,6 @@
 name: Test Project
 
 on:
-  pull_request:
-    branches:
-      - main
   push:
     branches:
       - main
@@ -22,24 +19,12 @@ jobs:
         with:
           node-version: "23"
           cache: "npm"
-
-      - name: List directory contents
-        run: |
-          pwd
-          ls -la
-          echo "Current directory: $PWD"
-
+          
       - name: Install dependencies
-        run: |
-          cd $GITHUB_WORKSPACE
-          npm ci
+        run: npm ci
 
       - name: Run tests
-        run: |
-          cd $GITHUB_WORKSPACE
-          npm test
+        run: npm test
 
       - name: Build project
-        run: |
-          cd $GITHUB_WORKSPACE
-          npm run build
+        run: npm run build
