@@ -2,10 +2,13 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import path from "path";
+import { fileURLToPath } from "url";
 import { createServer } from "http";
 import { Server } from "socket.io";
 
 import { connectDB } from "./config/db.js";
+import { connectRedis } from "./config/db.js";
 
 import registerRoutes from "./routes/register.js";
 import authRoutes from "./routes/auth.js";
@@ -19,6 +22,13 @@ dotenv.config();
 const PORT = process.env.PORT || 3001;
 
 const app = express();
+
+// Fix for ES Modules (no __dirname)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+app.use(express.static(path.join(__dirname, 'public')));
+
+const server = createServer(app);
 
 // Middleware
 app.use(
@@ -45,10 +55,16 @@ app.get("/", (req, res) => {
   res.send("Server is ready");
 });
 
-const server = app.listen(PORT, () => {
-  connectDB();
-  console.log("Server started at http://localhost:3000");
-});
+// Async so server starts after DB/Redis connected
+const startServer = async () => {
+  await connectDB();
+  await connectRedis();
+  server.listen(PORT, () => {
+    console.log(`Server started at http://localhost:${PORT}`);
+  });
+};
+startServer();
+
 
 /* ----------------------------------------------Socket.io---------------------------------------------------*/
 const io = new Server(server, {

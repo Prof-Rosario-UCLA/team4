@@ -10,13 +10,18 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["favicon.ico", "apple-touch-icon.png", "masked-icon.svg"],
+      includeAssets: [
+        "favicon.ico",
+        "apple-touch-icon.png",
+        "pwa-192x192.png",
+        "pwa-512x512.png",
+      ],
       manifest: {
         name: "Oversea",
         short_name: "Oversea",
         description: "AI-Powered Travel Assistant",
         theme_color: "#ffffff",
-        start_url: '/agent',
+        start_url: "/agent",
         icons: [
           {
             src: "pwa-192x192.png",
@@ -31,6 +36,7 @@ export default defineConfig({
         ],
       },
       workbox: {
+        globPatterns: ["**/*.{js,css,html,ico,png,svg}"],
         runtimeCaching: [
           {
             // API calls - Network First
@@ -45,11 +51,15 @@ export default defineConfig({
             },
           },
           {
-            // STatis assets - Cache First
+            // Static assets - Cache First
             urlPattern: /\.(?:png|jpg|jpeg|svg|gif)$/,
             handler: "CacheFirst",
             options: {
               cacheName: "static-assets",
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
+              },
             },
           },
         ],
