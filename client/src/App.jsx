@@ -21,6 +21,7 @@ function App() {
         <Route path="/" element={<Layout />}>
           {/* Protected routes */}
           <Route path="agent" element={<AgentChatPage />} />
+          <Route path="agent/:sessionId" element={<AgentChatPage />} />         
           <Route path="discussion" element={<DiscussionPage />} />
           <Route path="chatroom" element={<ChatroomPage />} />
 

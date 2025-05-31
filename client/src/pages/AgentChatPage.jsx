@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 import axios from "axios";
 import useAxiosPrivate from "../hooks/useAxiosPrivate.jsx";
 import UserInputBox from "../components/userInputBox";
@@ -11,83 +11,248 @@ const AgentChatPage = () => {
   const bottomRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
+  const { sessionId } = useParams();
 
-  // Debug auth state
-  useEffect(() => {
-    console.log("Current auth state:", auth);
-  }, [auth]);
-
-  /*-------------------------------------------------------------Handle Messages------------------------------------------------------------*/
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
+  const [currentSession, setCurrentSession] = useState(null);
+  const [isCreatingSession, setIsCreatingSession] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasInitialized, setHasInitialized] = useState(false);
 
-  // Load chat history
-  useEffect(() => {
-    let isMounted = true;
-    const controller = new AbortController();
+  /*-------------------------------------------------------------Load Messages------------------------------------------------------------*/
+  // Fetch all sessions and set the current session
+  /*
+  session:
+    _id: "$session_id",
+    lastMessage: { $first: "$content" },
+    lastTimeStamp: { $first: "$timestamp" },
+    messageCount: { $sum: 1 },
+  */
+  const fetchSession = async () => {
+    try {
+      const res = await axiosPrivate.get("/api/chatHistory/sessions");
 
-    const fetchMessages = async () => {
-      try {
-        console.log("Fetching messages with auth:", auth);
-        const res = await axiosPrivate.get("/api/chatHistory", {
-          signal: controller.signal,
-        });
-        console.log("Chat history response:", res);
-        if (isMounted) {
-          setMessages(res.data || []);
-        }
-      } catch (err) {
-        if (err.name === "CanceledError") {
-          console.log("Request was canceled");
-          return;
-        }
-        console.error("Error fetching messages:", err);
-        if (err.response?.status === 401 || err.response?.status === 403) {
-          navigate("/login", { state: { from: location }, replace: true });
-        }
-      }
-    };
+      const session = res.data.find((s) => s._id === sessionId);
 
-    if (auth?.user) {
-      fetchMessages();
+      setCurrentSession(session);
+    } catch (err) {
+      console.error("Error fetching sessions: ", err);
+    }
+  };
+
+  // Fetch messages corresponding to the current session
+  // Fetch messages corresponding to the current session
+  const fetchMessages = async (sessionId) => {
+    console.log("🔍 fetchMessages called with sessionId:", sessionId);
+
+    if (!sessionId) {
+      console.log("❌ No sessionId provided, skipping fetch");
+      return;
     }
 
-    return () => {
-      isMounted = false;
-      controller.abort();
-    };
-  }, [auth, axiosPrivate, location, navigate]);
-
-  // Send message function
-  const sendMessage = async () => {
-    if (!input.trim() || !auth?.user) return;
-
-    const userMsg = { role: "user", content: input };
-    setMessages((prev) => [...prev, userMsg]);
-    setInput("");
+    console.log("📡 Making request to:", `/api/chatHistory/${sessionId}`);
 
     try {
-      // Session_id to differential each chatHistory (Will be use in future)
-      const session_id =
-        localStorage.getItem("session_id") ||
-        (() => {
-          const id = crypto.randomUUID();
-          localStorage.setItem("session_id", id);
-          return id;
-        })();
+      const res = await axiosPrivate.get(`/api/chatHistory/${sessionId}`);
+
+      console.log("✅ fetchMessages response:", {
+        status: res.status,
+        dataLength: res.data?.length || 0,
+        data: res.data,
+      });
+
+      setMessages(res.data || []);
+      return res.data || [];
+    } catch (err) {
+      if (err.name === "CanceledError") {
+        console.log("⏸️ Request was canceled");
+        return;
+      }
+
+      console.error("❌ Error fetching messages:", {
+        message: err.message,
+        status: err.response?.status,
+        statusText: err.response?.statusText,
+        data: err.response?.data,
+        url: err.config?.url,
+      });
+
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        console.log("🔒 Auth error, redirecting to login");
+        navigate("/login", { state: { from: location }, replace: true });
+      }
+
+      return [];
+    }
+  };
+
+// Update current messages and section of the agentChatPage every time user changes
+useEffect(() => {
+  console.log("🚨 useEffect triggered with:", {
+    authUser: !!auth?.user,
+    sessionId: sessionId,
+    hasInitialized: hasInitialized,
+    currentSession: currentSession?._id
+  });
+
+  const initializeChat = async () => {
+    console.log("🚀 initializeChat function called");
+    
+    if (!auth?.user) {
+      console.log("❌ No auth.user, returning early");
+      return;
+    }
+
+    console.log("✅ Auth user exists, proceeding...");
+
+    if (sessionId) {
+      console.log("📍 SessionId exists:", sessionId);
+      
+      if (!hasInitialized || !currentSession || currentSession._id !== sessionId) {
+        console.log("🔄 Need to initialize - conditions:", {
+          needsInit_hasInitialized: !hasInitialized,
+          needsInit_noCurrentSession: !currentSession,
+          needsInit_sessionMismatch: currentSession?._id !== sessionId
+        });
+        
+        setIsLoading(true);
+
+        try {
+          console.log("📥 Starting to fetch data...");
+          
+          await Promise.all([fetchMessages(sessionId), fetchSession()]);
+          
+          console.log("✅ Data fetch completed, setting hasInitialized to true");
+          setHasInitialized(true);
+        } catch (err) {
+          console.error("❌ Failed to load session data:", err);
+        } finally {
+          console.log("🏁 Setting isLoading to false");
+          setIsLoading(false);
+        }
+      } else {
+        console.log("✅ Already initialized, skipping fetch");
+      }
+    } else {
+      console.log("🆕 No sessionId - setting up for new chat");
+      setMessages([]);
+      setCurrentSession(null);
+      setHasInitialized(true);
+    }
+  };
+  
+  console.log("📞 About to call initializeChat()");
+  initializeChat();
+}, [auth?.user, sessionId]);
+
+// Also add this debug for the reset effect:
+useEffect(() => {
+  console.log("🔄 SessionId changed, resetting hasInitialized to false. SessionId:", sessionId);
+  setHasInitialized(false);
+}, [sessionId]);
+
+  /*-------------------------------------------------------------Create new session------------------------------------------------------------*/
+  const createNewSession = async (userInput) => {
+    if (isCreatingSession) return null;
+
+    setIsCreatingSession(true);
+
+    try {
+      // Pop up a modal that ask for the name of new session
+      const autoSessionName =
+        userInput.length > 30 ? userInput.substring(0, 30) + "..." : userInput;
+
+      const newSessionId = crypto.randomUUID();
+
+      const newSession = {
+        _id: newSessionId,
+        name: autoSessionName,
+        lastMessage: "",
+        lastTimestamp: new Date(),
+        messageCount: 0,
+      };
+
+      setCurrentSession(newSession);
+      setHasInitialized(true);
+
+      navigate(`/agent/${newSessionId}`, { replace: true });
+
+      return newSessionId;
+    } catch (err) {
+      console.error("Error creating new session:", err);
+      return null;
+    } finally {
+      setIsCreatingSession(false);
+    }
+  };
+
+  /*-------------------------------------------------------------Handle Messages------------------------------------------------------------*/
+  // Send message function
+  const sendMessage = async () => {
+    if (!input.trim() || !auth?.user || isCreatingSession || isSending) return;
+
+    const userMsg = { role: "user", content: input };
+    const userInput = input;
+
+    // Add messages to UI immediately
+    setMessages((prev) => [...prev, userMsg]);
+    setInput("");
+    setIsSending(true);
+
+    try {
+      let activeSessionId = sessionId;
+
+      if (!sessionId && !currentSession) {
+        console.log("New session....");
+        activeSessionId = await createNewSession(userInput);
+
+        if (!activeSessionId) {
+          console.error("Failed to create new session");
+          setMessages((prev) => [
+            ...prev,
+            { role: "error", content: "Failed to create new chat session." },
+          ]);
+          return;
+        }
+        // Note: navigate() happens inside createNewSession, but we don't wait for re-render
+        // We use the returned session ID to continue processing immediately
+        // The component will re-render after the function completed, and later with updated useParams
+      }
+
+      // Ensure that session's name has a fallback
+      const sessionName =
+        currentSession?.name ||
+        (userInput.length > 30
+          ? userInput.substring(0, 30) + "..."
+          : userInput);
 
       // Save user message to MongoDB
-      await axiosPrivate.post("/api/chatHistory", { ...userMsg, session_id });
+      await axiosPrivate.post("/api/chatHistory", {
+        ...userMsg,
+        session_id: activeSessionId,
+        session_name: sessionName,
+      });
 
       // Send message to AI agent
       const res = await axios.post("http://localhost:8000/chat", {
-        message: input,
-        session_id,
+        message: userInput,
+        session_id: activeSessionId,
       });
+
+      if (!res.data || !res.data.reply) {
+        throw new Error("Invalid response from AI service");
+      }
+
       const botMsg = { role: "agent", content: res.data.reply };
 
       // Save agent message to MongoDB
-      await axiosPrivate.post("/api/chatHistory", { ...botMsg, session_id });
+      await axiosPrivate.post("/api/chatHistory", {
+        ...botMsg,
+        session_id: activeSessionId,
+        session_name: sessionName,
+      });
 
       setMessages((prev) => [...prev, botMsg]);
     } catch (err) {
@@ -96,6 +261,8 @@ const AgentChatPage = () => {
         ...prev,
         { role: "error", content: "Failed to connect to AI arguments." },
       ]);
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -126,25 +293,29 @@ const AgentChatPage = () => {
           {messages.map((msg, idx) => (
             <div
               key={idx}
-              style={{ textAlign: msg.role === "user" ? "right" : "left" }}
+              className={`flex ${
+                msg.role === "user" ? "justify-end" : "justify-start"
+              } mb-4`}
             >
-              <p>
-                <strong>{msg.role}:</strong> {msg.content}
-              </p>
+              <div
+                className={`${msg.role === "user" ? "bg-gray-200 my-3 py-2 px-4 rounded-4xl" : ""}`}
+              >
+                <p>{msg.content}</p>
+              </div>
             </div>
           ))}
           <div ref={bottomRef} />
         </div>
       ) : (
         <div className="w-full flex min-h-[30vh] items-center justify-center font-bold text-lg md:text-xl ">
-          <p >Sign in to start chatting with the Travel Agent!</p>
+          <p>Sign in to start chatting with the Travel Agent!</p>
         </div>
       )}
 
       <UserInputBox
         value={input}
         onChange={(e) => setInput(e.target.value)}
-        onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+        onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
         placeholder="Ask the travel agent..."
         message={sendMessage}
         textareaRef={textareaRef}

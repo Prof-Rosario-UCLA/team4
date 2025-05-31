@@ -34,7 +34,7 @@ const UserInputBox = ({
             <RequireAuthButton>
               <button
                 onClick={message}
-                className="text-gray-600 hover:text-black"
+                className="text-black"
               >
                 <BsArrowUpCircleFill className="w-8 h-8" />
               </button>
