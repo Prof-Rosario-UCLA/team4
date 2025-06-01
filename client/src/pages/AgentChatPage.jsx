@@ -18,7 +18,6 @@ const AgentChatPage = () => {
   const [currentSession, setCurrentSession] = useState(null);
   const [isCreatingSession, setIsCreatingSession] = useState(false);
   const [isSending, setIsSending] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [hasInitialized, setHasInitialized] = useState(false);
 
   /*-------------------------------------------------------------Load Messages------------------------------------------------------------*/
@@ -32,9 +31,9 @@ const AgentChatPage = () => {
   */
   const fetchSession = async () => {
     try {
-      const res = await axiosPrivate.get("/api/chatHistory/sessions");
+      const res = await axiosPrivate.get("/api/session");
 
-      const session = res.data.find((s) => s._id === sessionId);
+      const session = res.data.find((s) => s.session_id === sessionId);
 
       setCurrentSession(session);
     } catch (err) {
@@ -52,16 +51,8 @@ const AgentChatPage = () => {
       return;
     }
 
-    console.log("📡 Making request to:", `/api/chatHistory/${sessionId}`);
-
     try {
       const res = await axiosPrivate.get(`/api/chatHistory/${sessionId}`);
-
-      console.log("✅ fetchMessages response:", {
-        status: res.status,
-        dataLength: res.data?.length || 0,
-        data: res.data,
-      });
 
       setMessages(res.data || []);
       return res.data || [];
@@ -88,70 +79,50 @@ const AgentChatPage = () => {
     }
   };
 
-// Update current messages and section of the agentChatPage every time user changes
-useEffect(() => {
-  console.log("🚨 useEffect triggered with:", {
-    authUser: !!auth?.user,
-    sessionId: sessionId,
-    hasInitialized: hasInitialized,
-    currentSession: currentSession?._id
-  });
+  // Update current messages and section of the agentChatPage every time user changes
+  useEffect(() => {
+    const initializeChat = async () => {
+      console.log("🚀 initializeChat function called");
 
-  const initializeChat = async () => {
-    console.log("🚀 initializeChat function called");
-    
-    if (!auth?.user) {
-      console.log("❌ No auth.user, returning early");
-      return;
-    }
+      if (!auth?.user) {
+        console.log("❌ No auth.user, returning early");
+        return;
+      }
 
-    console.log("✅ Auth user exists, proceeding...");
+      if (sessionId) {
+        console.log("📍 SessionId exists:", sessionId);
 
-    if (sessionId) {
-      console.log("📍 SessionId exists:", sessionId);
-      
-      if (!hasInitialized || !currentSession || currentSession._id !== sessionId) {
-        console.log("🔄 Need to initialize - conditions:", {
-          needsInit_hasInitialized: !hasInitialized,
-          needsInit_noCurrentSession: !currentSession,
-          needsInit_sessionMismatch: currentSession?._id !== sessionId
-        });
-        
-        setIsLoading(true);
+        if (
+          !hasInitialized ||
+          !currentSession ||
+          currentSession.session_id !== sessionId
+        ) {
 
-        try {
-          console.log("📥 Starting to fetch data...");
-          
-          await Promise.all([fetchMessages(sessionId), fetchSession()]);
-          
-          console.log("✅ Data fetch completed, setting hasInitialized to true");
-          setHasInitialized(true);
-        } catch (err) {
-          console.error("❌ Failed to load session data:", err);
-        } finally {
-          console.log("🏁 Setting isLoading to false");
-          setIsLoading(false);
+          try {
+            await Promise.all([fetchMessages(sessionId), fetchSession()]);
+
+            setHasInitialized(true);
+          } catch (err) {
+            console.error("❌ Failed to load session data:", err);
+          } 
+        } else {
+          console.log("✅ Already initialized, skipping fetch");
         }
       } else {
-        console.log("✅ Already initialized, skipping fetch");
+        console.log("🆕 No sessionId - setting up for new chat");
+        setMessages([]);
+        setCurrentSession(null);
+        setHasInitialized(true);
       }
-    } else {
-      console.log("🆕 No sessionId - setting up for new chat");
-      setMessages([]);
-      setCurrentSession(null);
-      setHasInitialized(true);
-    }
-  };
-  
-  console.log("📞 About to call initializeChat()");
-  initializeChat();
-}, [auth?.user, sessionId]);
+    };
 
-// Also add this debug for the reset effect:
-useEffect(() => {
-  console.log("🔄 SessionId changed, resetting hasInitialized to false. SessionId:", sessionId);
-  setHasInitialized(false);
-}, [sessionId]);
+    initializeChat();
+  }, [auth?.user, sessionId, currentSession, fetchMessages, fetchSession, hasInitialized]);
+
+  // Also add this debug for the reset effect:
+  useEffect(() => {
+    setHasInitialized(false);
+  }, [sessionId]);
 
   /*-------------------------------------------------------------Create new session------------------------------------------------------------*/
   const createNewSession = async (userInput) => {
@@ -164,15 +135,20 @@ useEffect(() => {
       const autoSessionName =
         userInput.length > 30 ? userInput.substring(0, 30) + "..." : userInput;
 
+      // Generate new session id
       const newSessionId = crypto.randomUUID();
 
+      // Create new session object
       const newSession = {
-        _id: newSessionId,
-        name: autoSessionName,
-        lastMessage: "",
+        session_id: newSessionId,
+        session_name: autoSessionName,
         lastTimestamp: new Date(),
         messageCount: 0,
+        // user_id will be added by backend from req.user._id
       };
+
+      // Update database
+      await axiosPrivate.post("/api/session", { newSession });
 
       setCurrentSession(newSession);
       setHasInitialized(true);
@@ -223,7 +199,7 @@ useEffect(() => {
 
       // Ensure that session's name has a fallback
       const sessionName =
-        currentSession?.name ||
+        currentSession?.session_name ||
         (userInput.length > 30
           ? userInput.substring(0, 30) + "..."
           : userInput);
@@ -298,7 +274,11 @@ useEffect(() => {
               } mb-4`}
             >
               <div
-                className={`${msg.role === "user" ? "bg-gray-200 my-3 py-2 px-4 rounded-4xl" : ""}`}
+                className={`${
+                  msg.role === "user"
+                    ? "bg-gray-200 my-3 py-2 px-4 rounded-4xl"
+                    : ""
+                }`}
               >
                 <p>{msg.content}</p>
               </div>

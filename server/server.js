@@ -16,6 +16,7 @@ import refreshRoutes from "./routes/refresh.js";
 import userRoutes from "./routes/user.js";
 import logoutRoutes from "./routes/logout.js";
 import chatHistoryRoutes from "./routes/chatHistory.js";
+import sessionRoutes from "./routes/session.js";
 import { verifyJWT } from "./middleware/verifyJWT.js";
 
 dotenv.config();
@@ -26,7 +27,7 @@ const app = express();
 // Fix for ES Modules (no __dirname)
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, "public")));
 
 const server = createServer(app);
 
@@ -50,6 +51,7 @@ app.use("/api/logout", logoutRoutes);
 app.use(verifyJWT);
 app.use("/api/user", userRoutes);
 app.use("/api/chatHistory", chatHistoryRoutes);
+app.use("/api/session", sessionRoutes);
 
 app.get("/", (req, res) => {
   res.send("Server is ready");
@@ -65,7 +67,6 @@ const startServer = async () => {
 };
 startServer();
 
-
 /* ----------------------------------------------Socket.io---------------------------------------------------*/
 const io = new Server(server, {
   cors: { origin: "http://localhost:5173" },
@@ -74,11 +75,13 @@ const io = new Server(server, {
 
 // Connection event (e.g. open a website)
 io.on("connection", (socket) => {
-
   socket.on("join_room", ({ username, room }) => {
     if (socket.data.room) {
       socket.leave(socket.data.room);
-      io.to(socket.data.room).emit("system_message", `${username} has left ${socket.data.room}.`);
+      io.to(socket.data.room).emit(
+        "system_message",
+        `${username} has left ${socket.data.room}.`
+      );
     }
 
     socket.data.username = username;
@@ -92,7 +95,7 @@ io.on("connection", (socket) => {
     socket.leave(room);
     socket.data.room = null;
     io.to(room).emit("system_message", `${username} has left ${room}.`);
-  })
+  });
 
   socket.on("chat_message", ({ message, room }) => {
     if (room) {

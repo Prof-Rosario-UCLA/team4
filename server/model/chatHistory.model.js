@@ -9,6 +9,7 @@ const chatHistorySchema = new mongoose.Schema(
     },
     session_id: {
         type: String,
+        required: true,
     },
     role: {
         type: String,

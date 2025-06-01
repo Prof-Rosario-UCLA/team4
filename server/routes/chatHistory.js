@@ -1,10 +1,9 @@
 import express from "express";
-import { getChatHistory, getAllSessions, updateChatHistory } from "../controllers/chatHistoryController.js";
+import { getChatHistory, updateChatHistory } from "../controllers/chatHistoryController.js";
 
 const router = express.Router();
 
-// API Refix: '/api/chatHistory'
-router.get("/sessions", getAllSessions);
+// API Prefix: '/api/chatHistory'
 router.get("/:sessionId", getChatHistory);
 router.post("/", updateChatHistory);
 
