@@ -117,7 +117,7 @@ const AgentChatPage = () => {
     };
 
     initializeChat();
-  }, [auth?.user, sessionId, currentSession, fetchMessages, fetchSession, hasInitialized]);
+  }, [auth?.user, sessionId]);
 
   // Also add this debug for the reset effect:
   useEffect(() => {
