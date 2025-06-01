@@ -64,7 +64,7 @@ describe("Login Tests", () => {
       expect.objectContaining({
         httpOnly: true,
         secure: true,
-        maxAge: 5000,
+        maxAge: 86400000,
       })
     );
 
