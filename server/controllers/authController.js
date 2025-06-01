@@ -44,7 +44,7 @@ export async function handleLogin(req, res) {
       httpOnly: true,
       samSite: "None",
       secure: true,
-      maxAge: 5 * 1000, // 5 seconds in milliseconds
+      maxAge: 24 * 60 * 60 * 1000, // 1 day in milliseconds
     });
 
     res.json({ accessToken });

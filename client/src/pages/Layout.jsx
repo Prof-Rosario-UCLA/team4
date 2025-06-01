@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Outlet } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import Sidebar from "../components/Sidebar.jsx";
 import OfflineFallback from '../components/OfflineFallback.jsx';
 import { useNetworkStatus } from "../hooks/useNetworkStatus.jsx";
 
@@ -18,8 +19,7 @@ const Layout = () => {
     <div className="flex h-screen">
       {/* Sidebar */}
       <aside className="hidden md:flex flex-col w-56 bg-gray-100 border-r border-gray-200">
-        <div className="p-4 font-bold text-lg">Sidebar</div>
-        {/* Add sidebar content here */}
+        <Sidebar />
       </aside>
 
       {/* Main area */}
