@@ -1,55 +1,42 @@
-# Build stage for Node.js dependencies and client build
-FROM node:18-alpine AS node-builder
+# Build stage
+FROM node:23.11.0-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files
+# Install dependencies and build
 COPY package*.json ./
 COPY client/package*.json ./client/
 COPY server/package*.json ./server/
-
-# Install dependencies
 RUN npm install
 RUN cd client && npm install
 RUN cd server && npm install
 
-# Copy source files
+# Copy source and build
 COPY . .
+RUN cd client && npm run build
 
-# Build client
-RUN npm run build-client
-
-# Python stage
-FROM python:3.9-slim
+# Production stage
+FROM python:3.12.3-slim
 
 WORKDIR /app
 
-# Install Node.js for running the server
-RUN apt-get update && apt-get install -y \
-    nodejs \
-    npm \
-    && rm -rf /var/lib/apt/lists/*
+# Install Node.js
+RUN apt-get update && apt-get install -y nodejs npm && rm -rf /var/lib/apt/lists/*
 
-# Copy built client and server files from node-builder
-COPY --from=node-builder /app/client/dist ./client/dist
-COPY --from=node-builder /app/client/node_modules ./client/node_modules
-COPY --from=node-builder /app/server ./server
-COPY --from=node-builder /app/server/node_modules ./server/node_modules
+# Copy built files
+COPY --from=builder /app/client/dist ./client/dist
+COPY --from=builder /app/server ./server
+COPY --from=builder /app/server/node_modules ./server/node_modules
+COPY --from=builder /app/ai-service ./ai-service
 
-# Copy AI service files
-COPY ai-service ./ai-service
-
-# Set up Python environment for AI service
+# Set up Python
 RUN python -m venv /app/ai-service/venv
-RUN . /app/ai-service/venv/bin/activate && \
-    pip install --no-cache-dir -r /app/ai-service/requirements.txt
+RUN . /app/ai-service/venv/bin/activate && pip install -r /app/ai-service/requirements.txt
 
-# Copy the main package.json and install production dependencies
-COPY package*.json ./
-RUN npm install --production
+# Create a simple server to serve the client
+RUN echo 'const express = require("express"); const path = require("path"); const app = express(); app.use(express.static(path.join(__dirname, "client/dist"))); app.listen(5173, "0.0.0.0", () => console.log("Client server running on port 5173"));' > /app/serve-client.js
 
-# Expose necessary ports
-EXPOSE 3000 8000 5000
+# Start services
+CMD ["/bin/bash", "-c", "node /app/serve-client.js & cd /app/server && npm start & cd /app/ai-service && /app/ai-service/venv/bin/uvicorn api_server:app --host 0.0.0.0 --port 5000 & wait"]
 
-# Start all services
-CMD ["npm", "start"] 
+EXPOSE 5173 3000 5000
