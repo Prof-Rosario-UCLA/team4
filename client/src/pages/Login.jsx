@@ -48,7 +48,11 @@ const Login = () => {
       // Store the access token
       const accessToken = response?.data?.accessToken;
 
-      setAuth({ user, pwd, accessToken });
+      // Store username and access token in auth state
+      setAuth({
+        user: user, // Store username directly
+        accessToken,
+      });
 
       setUser("");
       setPwd("");

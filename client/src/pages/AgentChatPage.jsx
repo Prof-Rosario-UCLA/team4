@@ -319,7 +319,7 @@ const AgentChatPage = () => {
         </>
       ) : (
         // Centered layout when no sessionId
-        <div className="flex flex-col items-center justify-center space-y-6 -mt-20 w-full px-5">
+        <div className="flex flex-col items-center justify-center space-y-6 -mt-70 w-full px-5">
           <div className="text-center">
             <h3 className="text-2xl md:text-3xl text-gray-800 mb-2">
               Ask me anything about your travel plans!
