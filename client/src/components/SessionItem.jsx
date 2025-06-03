@@ -1,11 +1,12 @@
-import React, { useState } from 'react'
+import { useState } from 'react';
+import { BiDotsVerticalRounded } from "react-icons/bi";
 
 const SessionItem = ({ sessionName, onSelect }) => {
   const [showMenu, setShowMenu] = useState(false);
 
   return (
-    <div className='group relative mx-2 mb-1 rounded-lg cursor-pointer' onClick={onSelect}>
-      <div className="flex items-start justify-between gap-3 p-3">
+    <div className='group relative mx-2 rounded-4xl hover:bg-gray-300 hover:{showMenu=true} cursor-pointer' onClick={onSelect}>
+      <div className="flex items-center justify-between gap-3 px-3 py-2">
         <p>
             {sessionName}
         </p>
@@ -14,17 +15,11 @@ const SessionItem = ({ sessionName, onSelect }) => {
             e.stopPropagation();
             setShowMenu(!showMenu);
           }}
+          className="hidden group-hover:flex cursor-pointer"
         >
-          btn
+          <BiDotsVerticalRounded className="w-5 h-5"/>
         </button>
       </div>
-
-      {showMenu && (
-        <div className="flex flex-col">
-          <button>Rename</button>
-          <button>Delete</button>
-        </div>
-      )}
     </div>
   )
 }

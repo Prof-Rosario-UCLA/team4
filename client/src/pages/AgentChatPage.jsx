@@ -20,6 +20,11 @@ const AgentChatPage = () => {
   const [isSending, setIsSending] = useState(false);
   const [hasInitialized, setHasInitialized] = useState(false);
 
+  // Custom event call
+  const triggerSessionsRefresh = () => {
+    window.dispatchEvent(new CustomEvent("refreshSessions"));
+  };
+
   /*-------------------------------------------------------------Load Messages------------------------------------------------------------*/
   // Fetch all sessions and set the current session
   /*
@@ -97,14 +102,13 @@ const AgentChatPage = () => {
           !currentSession ||
           currentSession.session_id !== sessionId
         ) {
-
           try {
             await Promise.all([fetchMessages(sessionId), fetchSession()]);
 
             setHasInitialized(true);
           } catch (err) {
             console.error("❌ Failed to load session data:", err);
-          } 
+          }
         } else {
           console.log("✅ Already initialized, skipping fetch");
         }
@@ -154,6 +158,9 @@ const AgentChatPage = () => {
       setHasInitialized(true);
 
       navigate(`/agent/${newSessionId}`, { replace: true });
+
+      // Trigger session fetch
+      triggerSessionsRefresh();
 
       return newSessionId;
     } catch (err) {
@@ -231,6 +238,9 @@ const AgentChatPage = () => {
       });
 
       setMessages((prev) => [...prev, botMsg]);
+
+      // Trigger session fetch
+      triggerSessionsRefresh();
     } catch (err) {
       console.error("Error sending message:", err);
       setMessages((prev) => [
@@ -263,44 +273,70 @@ const AgentChatPage = () => {
 
   /* -------------------------------------------------------------Return function------------------------------------------------------------*/
   return (
-    <div className="w-full max-w-3xl mx-auto">
-      {auth?.user ? (
-        <div style={{ paddingBottom: `${bottomPadding}px` }}>
-          {messages.map((msg, idx) => (
-            <div
-              key={idx}
-              className={`flex ${
-                msg.role === "user" ? "justify-end" : "justify-start"
-              } mb-4`}
-            >
-              <div
-                className={`${
-                  msg.role === "user"
-                    ? "bg-gray-200 my-3 py-2 px-4 rounded-4xl"
-                    : ""
-                }`}
-              >
-                <p>{msg.content}</p>
-              </div>
+    <div
+      className={`w-full mx-auto ${
+        !sessionId ? "h-full flex flex-col items-center justify-center" : "max-w-3xl"
+      }`}
+    >
+      {sessionId ? (
+        // Existing chat interface when sessionId exists
+        <>
+          {auth?.user ? (
+            <div style={{ paddingBottom: `${bottomPadding}px` }}>
+              {messages.map((msg, idx) => (
+                <div
+                  key={idx}
+                  className={`flex ${
+                    msg.role === "user" ? "justify-end" : "justify-start"
+                  } mb-4`}
+                >
+                  <div
+                    className={`${
+                      msg.role === "user"
+                        ? "bg-gray-200 my-3 py-2 px-4 rounded-4xl"
+                        : ""
+                    }`}
+                  >
+                    <p>{msg.content}</p>
+                  </div>
+                </div>
+              ))}
+              <div ref={bottomRef} />
             </div>
-          ))}
-          <div ref={bottomRef} />
-        </div>
+          ) : (
+            <div className="w-full flex min-h-[30vh] items-center justify-center font-bold text-lg md:text-xl ">
+              <p>Sign in to start chatting with the Travel Agent!</p>
+            </div>
+          )}
+
+          <UserInputBox
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Ask the travel agent..."
+            message={sendMessage}
+            textareaRef={textareaRef}
+          />
+        </>
       ) : (
-        <div className="w-full flex min-h-[30vh] items-center justify-center font-bold text-lg md:text-xl ">
-          <p>Sign in to start chatting with the Travel Agent!</p>
+        // Centered layout when no sessionId
+        <div className="flex flex-col items-center justify-center space-y-6 -mt-20 w-full px-5">
+          <div className="text-center">
+            <h3 className="text-2xl md:text-3xl text-gray-800 mb-2">
+              Ask me anything about your travel plans!
+            </h3>
+          </div>
+
+          <div className="w-full max-w-3xl">
+            <UserInputBox
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Ask the travel agent..."
+              message={sendMessage}
+              textareaRef={textareaRef}
+            />
+          </div>
         </div>
       )}
-
-      <UserInputBox
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
-        placeholder="Ask the travel agent..."
-        message={sendMessage}
-        textareaRef={textareaRef}
-      />
-      {/*<Users />*/}
     </div>
   );
 };

@@ -7,10 +7,12 @@ const navLinks = [
     title: "Agent",
     path: "/agent"
   },
+  /*
   {
     title: "Discussion",
     path: "/discussion"
   },
+  */
   {
     title: "Chatroom",
     path: "/chatroom"
