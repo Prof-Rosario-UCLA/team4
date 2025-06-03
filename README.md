@@ -43,7 +43,7 @@ cd ../client
 npm install
 
 # -------------------------------
-# Root (Optional if using shared tools or scripts)
+# Root
 # -------------------------------
 cd ..
 npm install
