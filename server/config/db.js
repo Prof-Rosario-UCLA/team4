@@ -22,9 +22,9 @@ export const redisClient = redis.createClient({
 export const connectRedis = async () => {
   try {
     await redisClient.connect();
-    console.log(`Redis Connected: ${process.env.REDIS_HOST || 'localhost'}:${process.env.REDIS_PORT || 6379}`);
+    console.log(`Redis (Server) Connected: ${process.env.REDIS_HOST || 'localhost'}:${process.env.REDIS_PORT || 6379}`);
   } catch (error) {
-    console.log(`Redis connection error: ${error.message}`);
+    console.log(`Redis (Server) connection errcor: ${error.message}`);
     process.exit(1);
   }
 }
