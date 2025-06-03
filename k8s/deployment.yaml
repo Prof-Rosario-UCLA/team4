@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oversea-app
+  labels:
+    app: oversea
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: oversea
+  template:
+    metadata:
+      labels:
+        app: oversea
+    spec:
+      containers:
+        - name: oversea
+          image: us-west1-docker.pkg.dev/${PROJECT_ID}/oversea/oversea:latest
+          ports:
+            - containerPort: 3000
+            - containerPort: 8000
+            - containerPort: 5000
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "1000m"
+              memory: "512Mi"
+          env:
+            - name: NODE_ENV
+              value: "production"

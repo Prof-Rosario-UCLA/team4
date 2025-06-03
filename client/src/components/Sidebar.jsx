@@ -86,11 +86,11 @@ const Sidebar = () => {
 
             const data = await response.json();
             setLocation(`${data.city}, ${data.countryName}`);
-          } catch (error) {
+          } catch (_) {
             setLocation("Location unavailable");
           }
         },
-        (error) => setLocation("Location unavailable")
+        () => setLocation("Location unavailable")
       );
     }
   }, [showProfileModal]);

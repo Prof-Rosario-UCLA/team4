@@ -14,17 +14,21 @@ export const connectDB = async () => {
 // Create Redis client
 export const redisClient = redis.createClient({
   socket: {
-    host: process.env.REDIS_HOST || 'localhost',
-    port: process.env.REDIS_PORT ? parseInt(process.env.REDIS_PORT) : 6379
-  }
+    host: process.env.REDIS_HOST || "localhost",
+    port: process.env.REDIS_PORT ? parseInt(process.env.REDIS_PORT) : 6379,
+  },
 });
 
 export const connectRedis = async () => {
   try {
     await redisClient.connect();
-    console.log(`Redis (Server) Connected: ${process.env.REDIS_HOST || 'localhost'}:${process.env.REDIS_PORT || 6379}`);
+    console.log(
+      `Redis (Server) Connected: ${process.env.REDIS_HOST || "localhost"}:${
+        process.env.REDIS_PORT || 6379
+      }`
+    );
   } catch (error) {
     console.log(`Redis (Server) connection errcor: ${error.message}`);
     process.exit(1);
   }
-}
+};
