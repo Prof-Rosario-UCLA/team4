@@ -86,7 +86,8 @@ const Sidebar = () => {
 
             const data = await response.json();
             setLocation(`${data.city}, ${data.countryName}`);
-          } catch (_) {
+          } catch (err) {
+            console.error("Error occurred in fetching location: ", err);
             setLocation("Location unavailable");
           }
         },
