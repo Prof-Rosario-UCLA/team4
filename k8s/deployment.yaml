@@ -47,11 +47,20 @@ spec:
         - name: REDIS_PORT
           value: "6379"
         - name: MONGO_URI
-          value: "mongodb+srv://lin1jason8:cA2ImfE16GyotKZt@cluster0.uucmvfv.mongodb.net/General?retryWrites=true&w=majority&appName=Cluster0"
+          valueFrom:
+            secretKeyRef:
+              name: oversea-secrets
+              key: MONGO_URI
         - name: ACCESS_TOKEN_SECRET
-          value: "5a0e1a673a78c1f35b8d3df532a5e095f1a8f2676c08b74642d5ff189840d8f5638179bc211d08b8e81cc336eaaeb677a10c93c15c7c8a100bb829848bad64b9"
+          valueFrom:
+            secretKeyRef:
+              name: oversea-secrets
+              key: ACCESS_TOKEN_SECRET
         - name: REFRESH_TOKEN_SECRET
-          value: "543ddacd84fa41b8df7d10f3dc1383974f7e5a75f5d86618617d2d713f26d62c816dcc50651dca3c9df96bcae01fa7a74de8e6138c2282b7371be382228a67c8"
+          valueFrom:
+            secretKeyRef:
+              name: oversea-secrets
+              key: REFRESH_TOKEN_SECRET
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -78,17 +87,26 @@ spec:
         - name: REDIS_PORT
           value: "6379"
         - name: MONGO_URI
-          value: "mongodb+srv://lin1jason8:cA2ImfE16GyotKZt@cluster0.uucmvfv.mongodb.net/General?retryWrites=true&w=majority&appName=Cluster0"
+          valueFrom:
+            secretKeyRef:
+              name: oversea-secrets
+              key: MONGO_URI
         - name: AZURE_OPENAI_ENDPOINT
-          value: "https://jlin-azureai.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2025-01-01-preview"  # UPDATE THIS
+          value: "https://jlin-azureai.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2025-01-01-preview"
         - name: AZURE_OPENAI_API_KEY
-          value: "ARCWbNBQ2EFtkUKT6i8X6QBGQa2EhEvNSiqp2Fsgq97LpUFIsbq9JQQJ99BDACYeBjFXJ3w3AAABACOGp9st"
+          valueFrom:
+            secretKeyRef:
+              name: oversea-secrets
+              key: AZURE_OPENAI_API_KEY
         - name: AZURE_OPENAI_API_VERSION
           value: "2025-01-01-preview"
         - name: AZURE_SEARCH_SERVICE_ENDPOINT
           value: "https://travel-agent.search.windows.net"
         - name: AZURE_SEARCH_API_KEY
-          value: "g2EKRmgJYq1U6G7HStKFLUm2xyMwI5Z3ysQAIiTnhjAzSeCw9zn3"  # UPDATE THIS
+          valueFrom:
+            secretKeyRef:
+              name: oversea-secrets
+              key: AZURE_SEARCH_API_KEY
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -111,8 +129,17 @@ spec:
         - containerPort: 5173
         env:
         - name: VITE_API_URL
-          value: "http://localhost:3000" # Change to domain after
+          valueFrom:
+            secretKeyRef:
+              name: oversea-secrets
+              key: VITE_API_URL
         - name: VITE_AI_SERVICE_URL
-          value: "http://localhost:8000" # Change to domain after
+          valueFrom:
+            secretKeyRef:
+              name: oversea-secrets
+              key: VITE_AI_SERVICE_URL
         - name: VITE_GEOLOCATION_KEY
-          value: "089b937a800141f5aabddec79c904c87"
+          valueFrom:
+            secretKeyRef:
+              name: oversea-secrets
+              key: VITE_GEOLOCATION_KEY
