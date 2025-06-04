@@ -50,17 +50,17 @@ spec:
           valueFrom:
             secretKeyRef:
               name: oversea-secrets
-              key: MONGO_URI
+              key: MONGO_URI 
         - name: ACCESS_TOKEN_SECRET
           valueFrom:
             secretKeyRef:
               name: oversea-secrets
-              key: ACCESS_TOKEN_SECRET
+              key: ACCESS_TOKEN_SECRET 
         - name: REFRESH_TOKEN_SECRET
           valueFrom:
             secretKeyRef:
               name: oversea-secrets
-              key: REFRESH_TOKEN_SECRET
+              key: REFRESH_TOKEN_SECRET 
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -90,23 +90,32 @@ spec:
           valueFrom:
             secretKeyRef:
               name: oversea-secrets
-              key: MONGO_URI
+              key: MONGO_URI 
         - name: AZURE_OPENAI_ENDPOINT
-          value: "https://jlin-azureai.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2025-01-01-preview"
+          valueFrom:
+            secretKeyRef:
+              name: oversea-secrets
+              key: AZURE_OPENAI_ENDPOINT 
         - name: AZURE_OPENAI_API_KEY
           valueFrom:
             secretKeyRef:
               name: oversea-secrets
-              key: AZURE_OPENAI_API_KEY
+              key: AZURE_OPENAI_API_KEY 
         - name: AZURE_OPENAI_API_VERSION
-          value: "2025-01-01-preview"
+          valueFrom:
+            secretKeyRef:
+              name: oversea-secrets
+              key: AZURE_OPENAI_API_VERSION 
         - name: AZURE_SEARCH_SERVICE_ENDPOINT
-          value: "https://travel-agent.search.windows.net"
+          valueFrom:
+            secretKeyRef:
+              name: oversea-secrets
+              key: AZURE_SEARCH_SERVICE_ENDPOINT 
         - name: AZURE_SEARCH_API_KEY
           valueFrom:
             secretKeyRef:
               name: oversea-secrets
-              key: AZURE_SEARCH_API_KEY
+              key: AZURE_SEARCH_API_KEY  # UPDATE THIS
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -132,12 +141,12 @@ spec:
           valueFrom:
             secretKeyRef:
               name: oversea-secrets
-              key: VITE_API_URL
+              key: VITE_API_URL # Change to domain after
         - name: VITE_AI_SERVICE_URL
           valueFrom:
             secretKeyRef:
               name: oversea-secrets
-              key: VITE_AI_SERVICE_URL
+              key: VITE_AI_SERVICE_URL # Change to domain after
         - name: VITE_GEOLOCATION_KEY
           valueFrom:
             secretKeyRef:
