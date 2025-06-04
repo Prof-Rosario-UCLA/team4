@@ -1,33 +1,118 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: oversea-app
-  labels:
-    app: oversea
+  name: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:7-alpine
+        ports:
+        - containerPort: 6379
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oversea-server
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: oversea
+      app: oversea-server
   template:
     metadata:
       labels:
-        app: oversea
+        app: oversea-server
     spec:
       containers:
-        - name: oversea
-          image: us-west1-docker.pkg.dev/${PROJECT_ID}/oversea/oversea:latest
-          ports:
-            - containerPort: 3000
-            - containerPort: 8000
-            - containerPort: 5000
-          resources:
-            requests:
-              cpu: "100m"
-              memory: "128Mi"
-            limits:
-              cpu: "1000m"
-              memory: "512Mi"
-          env:
-            - name: NODE_ENV
-              value: "production"
+      - name: server
+        image: us-west1-docker.pkg.dev/cs144-25s-jlin18/oversea-app/oversea-server:v1
+        ports: 
+        - containerPort: 3000
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: PORT
+          value: "3000"
+        - name: REDIS_HOST
+          value: "redis-service"
+        - name: REDIS_PORT
+          value: "6379"
+        - name: MONGO_URI
+          value: "mongodb+srv://lin1jason8:cA2ImfE16GyotKZt@cluster0.uucmvfv.mongodb.net/General?retryWrites=true&w=majority&appName=Cluster0"
+        - name: ACCESS_TOKEN_SECRET
+          value: "5a0e1a673a78c1f35b8d3df532a5e095f1a8f2676c08b74642d5ff189840d8f5638179bc211d08b8e81cc336eaaeb677a10c93c15c7c8a100bb829848bad64b9"
+        - name: REFRESH_TOKEN_SECRET
+          value: "543ddacd84fa41b8df7d10f3dc1383974f7e5a75f5d86618617d2d713f26d62c816dcc50651dca3c9df96bcae01fa7a74de8e6138c2282b7371be382228a67c8"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oversea-ai-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: oversea-ai-service
+  template:
+    metadata:
+      labels:
+        app: oversea-ai-service
+    spec:
+      containers:
+      - name: ai-service
+        image: us-west1-docker.pkg.dev/cs144-25s-jlin18/oversea-app/oversea-ai-service:v1
+        ports:
+        - containerPort: 8000
+        env:
+        - name: REDIS_HOST
+          value: "redis-service"
+        - name: REDIS_PORT
+          value: "6379"
+        - name: MONGO_URI
+          value: "mongodb+srv://lin1jason8:cA2ImfE16GyotKZt@cluster0.uucmvfv.mongodb.net/General?retryWrites=true&w=majority&appName=Cluster0"
+        - name: AZURE_OPENAI_ENDPOINT
+          value: "https://jlin-azureai.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2025-01-01-preview"  # UPDATE THIS
+        - name: AZURE_OPENAI_API_KEY
+          value: "ARCWbNBQ2EFtkUKT6i8X6QBGQa2EhEvNSiqp2Fsgq97LpUFIsbq9JQQJ99BDACYeBjFXJ3w3AAABACOGp9st"
+        - name: AZURE_OPENAI_API_VERSION
+          value: "2025-01-01-preview"
+        - name: AZURE_SEARCH_SERVICE_ENDPOINT
+          value: "https://travel-agent.search.windows.net"
+        - name: AZURE_SEARCH_API_KEY
+          value: "g2EKRmgJYq1U6G7HStKFLUm2xyMwI5Z3ysQAIiTnhjAzSeCw9zn3"  # UPDATE THIS
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oversea-client
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: oversea-client
+  template:
+    metadata:
+      labels:
+        app: oversea-client
+    spec:
+      containers:
+      - name: client
+        image: us-west1-docker.pkg.dev/cs144-25s-jlin18/oversea-app/oversea-client:v1
+        ports:
+        - containerPort: 5173
+        env:
+        - name: VITE_API_URL
+          value: "http://localhost:3000" # Change to domain after
+        - name: VITE_AI_SERVICE_URL
+          value: "http://localhost:8000" # Change to domain after
+        - name: VITE_GEOLOCATION_KEY
+          value: "089b937a800141f5aabddec79c904c87"
