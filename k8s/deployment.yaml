@@ -115,7 +115,7 @@ spec:
           valueFrom:
             secretKeyRef:
               name: oversea-secrets
-              key: AZURE_SEARCH_API_KEY  # UPDATE THIS
+              key: AZURE_SEARCH_API_KEY
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -133,20 +133,20 @@ spec:
     spec:
       containers:
       - name: client
-        image: us-west1-docker.pkg.dev/cs144-25s-jlin18/oversea-app/oversea-client:v1
+        image: us-west1-docker.pkg.dev/cs144-25s-jlin18/oversea-app/oversea-client:v3
         ports:
-        - containerPort: 5173
+        - containerPort: 80
         env:
         - name: VITE_API_URL
           valueFrom:
             secretKeyRef:
               name: oversea-secrets
-              key: VITE_API_URL # Change to domain after
+              key: VITE_API_URL  # FIXED: was "team4.cs144.org"
         - name: VITE_AI_SERVICE_URL
           valueFrom:
             secretKeyRef:
               name: oversea-secrets
-              key: VITE_AI_SERVICE_URL # Change to domain after
+              key: VITE_AI_SERVICE_URL  # FIXED: was "team4.cs144.org"
         - name: VITE_GEOLOCATION_KEY
           valueFrom:
             secretKeyRef:

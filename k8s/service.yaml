@@ -28,20 +28,24 @@ metadata:
   name: oversea-ai-service-service
 spec: 
   selector:
-    app: oversea-client
+    app: oversea-ai-service
   ports:
-  - port: 80
-    targetPort: 5173
+  - port: 8000
+    targetPort: 8000
   type: ClusterIP
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: oversea-client-service
+  annotations:
+    cloud.google.com/neg: '{"ingress": true}'
+    cloud.google.com/backend-config: '{"default": "oversea-backend-config"}'
 spec:
   selector:
     app: oversea-client
   ports:
   - port: 80
-    targetPort: 5173
-  type: ClusterIP  # Changed from LoadBalancer to ClusterIP for Ingress
+    targetPort: 80  # FIXED: Must match container port
+    protocol: TCP
+  type: ClusterIP
