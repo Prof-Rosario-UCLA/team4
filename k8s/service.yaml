@@ -1,51 +1,18 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: redis-service
-spec:
-  selector:
-    app: redis
-  ports:
-  - port: 6379
-    targetPort: 6379
-  type: ClusterIP
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: oversea-server-service
-spec:
-  selector:
-    app: oversea-server
-  ports:
-  - port: 3000
-    targetPort: 3000
-  type: ClusterIP
----
-apiVersion: v1
-kind: Service
-metadata: 
-  name: oversea-ai-service-service
-spec: 
-  selector:
-    app: oversea-ai-service
-  ports:
-  - port: 8000
-    targetPort: 8000
-  type: ClusterIP
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: oversea-client-service
+  name: oversea-app-service
   annotations:
     cloud.google.com/neg: '{"ingress": true}'
     cloud.google.com/backend-config: '{"default": "oversea-backend-config"}'
 spec:
   selector:
-    app: oversea-client
+    app: oversea-app
   ports:
-  - port: 80
-    targetPort: 80  # FIXED: Must match container port
-    protocol: TCP
+  - name: web
+    port: 80
+    targetPort: 3000
+  - name: ai
+    port: 8000
+    targetPort: 8000
   type: ClusterIP

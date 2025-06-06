@@ -48,3 +48,20 @@ npm install
 cd ..
 npm install
 ```
+
+## Single Container Deployment
+
+This project now ships with a single Docker container that bundles the React client, Node.js API and Python AI service. Build and run the container with Docker Compose:
+
+```bash
+docker compose up --build
+```
+
+Set `REDIS_HOST` and `REDIS_PORT` to the address of your Google Cloud Memorystore instance so no Redis container is required.
+
+The separate Dockerfiles inside `client/`, `server/` and `ai-service/` have been removed. The root `Dockerfile` now builds the entire application. Docker Compose is provided for convenience, but you can also build and run the container directly:
+
+```bash
+docker build -t oversea-app .
+docker run -p 3000:3000 -p 8000:8000 --env-file .env oversea-app
+```

@@ -4,7 +4,6 @@ metadata:
   name: oversea-ingress
   annotations:
     kubernetes.io/ingress.class: "gce"
-    # Only add the cert annotation after HTTP is working! 
     networking.gke.io/managed-certificates: "oversea-certificate"
 spec:
   rules:
@@ -15,6 +14,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: oversea-client-service
+                name: oversea-app-service
                 port:
                   number: 80
