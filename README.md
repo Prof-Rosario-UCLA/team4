@@ -58,3 +58,10 @@ docker compose up --build
 ```
 
 Set `REDIS_HOST` and `REDIS_PORT` to the address of your Google Cloud Memorystore instance so no Redis container is required.
+
+The separate Dockerfiles inside `client/`, `server/` and `ai-service/` have been removed. The root `Dockerfile` now builds the entire application. Docker Compose is provided for convenience, but you can also build and run the container directly:
+
+```bash
+docker build -t oversea-app .
+docker run -p 3000:3000 -p 8000:8000 --env-file .env oversea-app
+```
