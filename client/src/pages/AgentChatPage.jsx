@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
-import axios from "axios";
+import { axiosAI } from "../api/axios";
 import useAxiosPrivate from "../hooks/useAxiosPrivate.jsx";
 import UserInputBox from "../components/userInputBox";
 import useAuth from "../hooks/useAuth";
@@ -57,7 +57,7 @@ const AgentChatPage = () => {
     }
 
     try {
-      const res = await axiosPrivate.get(`/api/chatHistory/${sessionId}`);
+      const res = await axiosAI.get(`/api/chatHistory/${sessionId}`);
 
       setMessages(res.data || []);
       return res.data || [];

@@ -2,7 +2,8 @@ import io from "socket.io-client";
 import { useEffect, useState, useRef } from "react";
 import useAuth from "../hooks/useAuth";
 
-const socket = io.connect("http://localhost:3000");
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const socket = io.connect(BASE_URL);
 
 const ChatRoom = () => {
   const { auth } = useAuth();
