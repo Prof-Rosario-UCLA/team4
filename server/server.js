@@ -59,9 +59,13 @@ app.use(express.json());
 app.use(cookieParser());
 
 // Proxy AI service requests
+// Proxy AI service requests
 app.use('/chat', createProxyMiddleware({
-  target: 'http://localhost:8000',
+  target: 'http://localhost:8000/chat',
   changeOrigin: true,
+  pathRewrite: {
+    '^/chat': ''  // Strip /chat since target already has it
+  }
 }));
 
 // Routes
