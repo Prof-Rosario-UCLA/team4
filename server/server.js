@@ -6,6 +6,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { createServer } from "http";
 import { Server } from "socket.io";
+import { createProxyMiddleware } from 'http-proxy-middleware';
 
 import { connectDB } from "./config/db.js";
 import { connectRedis } from "./config/db.js";
@@ -32,7 +33,11 @@ app.use(express.static(path.join(__dirname, "public")));
 const server = createServer(app);
 
 // Middleware
-const allowedOrigins = ["http://localhost:5173"].filter(Boolean);
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://35.233.161.58",  // Add your actual LoadBalancer IP here
+  "http://34.168.46.139"   // Add any other IPs you might be using
+].filter(Boolean);
 
 app.use(
   cors({
@@ -52,6 +57,12 @@ app.use(
 app.use(express.json());
 
 app.use(cookieParser());
+
+// Proxy AI service requests
+app.use('/chat', createProxyMiddleware({
+  target: 'http://localhost:8000',
+  changeOrigin: true,
+}));
 
 // Routes
 app.use("/api/register", registerRoutes);

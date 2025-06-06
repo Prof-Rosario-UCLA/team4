@@ -57,7 +57,7 @@ const AgentChatPage = () => {
     }
 
     try {
-      const res = await axiosAI.get(`/api/chatHistory/${sessionId}`);
+      const res = await axiosPrivate.get(`/api/chatHistory/${sessionId}`);
 
       setMessages(res.data || []);
       return res.data || [];
@@ -219,7 +219,7 @@ const AgentChatPage = () => {
       });
 
       // Send message to AI agent
-      const res = await axios.post("http://localhost:8000/chat", {
+      const res = await axiosAI.post("/chat", {
         message: userInput,
         session_id: activeSessionId,
       });
