@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oversea-app
+spec:
+  replicas: 2   # pods
+  selector:
+    matchLabels:
+      app: oversea-app
+  template:
+    metadata:
+      labels:
+        app: oversea-app
+    spec:
+      containers:
+      - name: oversea-app
+        image: us-west1-docker.pkg.dev/cs144-25s-jlin18/oversea-app/oversea-app:latest
+        ports:
+        - containerPort: 3000 

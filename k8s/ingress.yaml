@@ -5,6 +5,7 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: "gce"
     networking.gke.io/managed-certificates: "oversea-certificate"
+    networking.gke.io/v1beta1.FrontendConfig: "oversea-frontend-config"
 spec:
   rules:
     - host: team4.cs144.org
@@ -14,6 +15,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: oversea-app-service
+                name: oversea-service
                 port:
                   number: 80

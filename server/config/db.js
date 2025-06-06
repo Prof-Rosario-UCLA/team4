@@ -1,5 +1,8 @@
 import mongoose from "mongoose";
 import redis from "redis";
+import dotenv from "dotenv";
+
+dotenv.config({ path: '../.env' });
 
 export const connectDB = async () => {
   try {
@@ -11,25 +14,33 @@ export const connectDB = async () => {
   }
 };
 
-// Create Redis client
+// Create Redis client with better error handling
 export const redisClient = redis.createClient({
+  username: process.env.REDIS_USERNAME || 'default',
+  password: process.env.REDIS_PASSWORD,
   socket: {
-    host: process.env.REDIS_CLOUD_HOST || process.env.REDIS_HOST || "localhost",
-    port: process.env.REDIS_CLOUD_PORT ? parseInt(process.env.REDIS_CLOUD_PORT) : 6379,
-  },
-  password: process.env.REDIS_CLOUD_PWD || undefined,
+    host: process.env.REDIS_HOST,
+    port: process.env.REDIS_PORT ? parseInt(process.env.REDIS_PORT) : 6379,
+  }
 });
 
 export const connectRedis = async () => {
+  // Check if Redis config is available
+  if (!process.env.REDIS_HOST || !process.env.REDIS_PORT || !process.env.REDIS_PASSWORD) {
+    console.log('⚠️ Redis configuration incomplete - skipping Redis connection');
+    console.log('Missing:', {
+      host: !process.env.REDIS_HOST,
+      port: !process.env.REDIS_PORT,
+      password: !process.env.REDIS_PASSWORD
+    });
+    return;
+  }
+
   try {
     await redisClient.connect();
-    console.log(
-      `Redis (Server) Connected: ${process.env.REDIS_CLOUD_HOST || "localhost"}:${
-        process.env.REDIS_CLOUD_PORT || 6379
-      }`
-    );
+    console.log(`Redis (Server) Connected: ${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`);
   } catch (error) {
-    console.log(`Redis (Server) connection error: ${error.message}`);
-    process.exit(1);
+    console.log(`❌ Redis connection error: ${error.message}`);
+    console.log('Continuing without Redis cache...');
   }
 };
