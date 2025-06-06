@@ -8,6 +8,9 @@ RUN apt-get update && apt-get install -y curl gnupg && \
 
 WORKDIR /app
 
+# Copy environment file
+COPY .env ./
+
 # Copy root package info for concurrently script
 COPY package*.json ./
 RUN npm install --omit=dev
@@ -22,7 +25,13 @@ RUN pip install --no-cache-dir -r ai-service/requirements.txt
 
 # Build client
 COPY client/package*.json ./client/
-RUN cd client && npm install && npm run build
+RUN cd client && npm Install
+
+# Needs env variables at build time
+COPY client ./client
+COPY .env ./client/.env
+
+RUN cd client && npm run build
 
 # Copy source code
 COPY server ./server

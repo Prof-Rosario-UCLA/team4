@@ -18,7 +18,7 @@ import redis.asyncio as redis
 from typing import Optional, List
 
 # Load environment variables
-load_dotenv()
+load_dotenv(dotenv_path="../.env")
 
 
 # -------------------------------------------------------------Database Setup------------------------------------------------------------

@@ -32,9 +32,7 @@ app.use(express.static(path.join(__dirname, "public")));
 const server = createServer(app);
 
 // Middleware
-const allowedOrigins = [
-  "http://localhost:5173"
-].filter(Boolean);
+const allowedOrigins = ["http://localhost:5173"].filter(Boolean);
 
 app.use(
   cors({
@@ -45,7 +43,7 @@ app.use(
       if (allowedOrigins.indexOf(origin) !== -1) {
         callback(null, true);
       } else {
-        callback(new Error('Not allowed by CORS'));
+        callback(new Error("Not allowed by CORS"));
       }
     },
     credentials: true,
