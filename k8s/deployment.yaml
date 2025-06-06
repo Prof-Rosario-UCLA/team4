@@ -1,9 +1,10 @@
+# k8s/deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: oversea-app
 spec:
-  replicas: 2   # pods
+  replicas: 2
   selector:
     matchLabels:
       app: oversea-app
@@ -16,4 +17,18 @@ spec:
       - name: oversea-app
         image: us-west1-docker.pkg.dev/cs144-25s-jlin18/oversea-app/oversea-app:latest
         ports:
-        - containerPort: 3000 
+        - containerPort: 3000
+        - containerPort: 8000
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: PORT
+          value: "3000"
+        # Add these environment variables for the frontend
+        - name: VITE_API_URL
+          value: "http://35.233.161.58"  # Your LoadBalancer IP
+        - name: VITE_AI_SERVICE_URL
+          value: "http://35.233.161.58:8000"  # Your AI service
+        envFrom:
+        - secretRef:
+            name: oversea-secrets
