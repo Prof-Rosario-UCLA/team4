@@ -10,4 +10,4 @@ spec:
     unhealthyThreshold: 3
     type: HTTP
     requestPath: /
-    port: 5173
+    port: 80
