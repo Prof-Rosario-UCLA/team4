@@ -13,11 +13,6 @@ node_modules
 **/dist
 **/build
 
-# Environment files
-.env
-.env.local
-.env.*.local
-
 # IDE files
 .vscode
 .idea
@@ -36,4 +31,14 @@ yarn-error.log*
 
 # Testing
 coverage
-.nyc_output 
+.nyc_output
+
+# Environment files (don't include .env in container)
+.env
+.env.local
+.env.*.local
+
+# Docker and K8s files
+Dockerfile
+docker-compose*.yml
+k8s/

@@ -19,7 +19,7 @@ import chatHistoryRoutes from "./routes/chatHistory.js";
 import sessionRoutes from "./routes/session.js";
 import { verifyJWT } from "./middleware/verifyJWT.js";
 
-dotenv.config();
+dotenv.config({ path: '../.env' });
 const PORT = process.env.PORT || 3001;
 
 const app = express();

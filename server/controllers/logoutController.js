@@ -2,7 +2,7 @@ import User from "../model/user.model.js";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 
-dotenv.config();
+dotenv.config({ path: '../.env' });
 
 /*
 Purpose:

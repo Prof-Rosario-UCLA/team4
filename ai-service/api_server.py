@@ -35,10 +35,11 @@ msg_collection = db["Messages"]
 
 # Redis setup
 redis_client = redis.Redis(
-    host=os.getenv("REDIS_HOST", "localhost"),
-    port=int(os.getenv("REDIS_PORT", 6379)),
+    host=os.getenv("REDIS_CLOUD_HOST", "localhost"),
+    port=int(os.getenv("REDIS_CLOUD_PORT", 6379)),
+    password=os.getenv("REDIS_CLOUD_PWD"),
     db=0,
-    decode_responses=False,
+    decode_responses=True,
     socket_connect_timeout=5,
     socket_keepalive=True,
     health_check_interval=30,

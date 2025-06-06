@@ -1,44 +1,30 @@
-# Makefile for Docker operations
+# Makefile for Single Container Docker operations
 
-.PHONY: help build up down dev dev-up dev-down logs clean
+.PHONY: help build run stop logs clean
 
 help:
 	@echo "Available commands:"
-	@echo "  make build      - Build production containers"
-	@echo "  make up		 - Start production containers"
-	@echo "  make down 		 - Stop containers"
-	@echo "  make dev		 - Build and start development containers"
-	@echo "  make dev-up	 - Start development containers"
-	@echo "  make dev-down   - Stop development containers"
+	@echo "  make build      - Build the container"
+	@echo "  make run        - Run the container"
+	@echo "  make stop       - Stop the container"
 	@echo "  make logs       - View container logs"
-	@echo "  make clean		 - Remove containers and volumes"
+	@echo "  make clean      - Remove container and image"
 
-# Production commands
+# Single container commands
 build:
-	docker-compose build
+	docker build -t oversea-app .
 
-up: 
-	docker-compose up -d
+run:
+	docker run -d --name oversea-app -p 3000:3000 -p 8000:8000 --env-file .env oversea-app
 
-down: 
-	docker-compose down
+stop:
+	docker stop oversea-app || true
+	docker rm oversea-app || true
 
-
-# Development commands
-dev: 
-	docker-compose -f docker-compose.dev.yml up --build
-
-dev-up:
-	docker-compose -f docker-compose.dev.yml up -d 
-
-dev-down:
-	docker-compose -f docker-compose.dev.yml down 
-
-
-# Utility commands
 logs:
-	docker-compose logs -f 
+	docker logs -f oversea-app
 
 clean:
-	docker-compose down -v 
-	docker-compose -f docker-compose.dev.yml down -v
+	docker stop oversea-app || true
+	docker rm oversea-app || true
+	docker rmi oversea-app || true
