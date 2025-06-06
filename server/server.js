@@ -21,7 +21,7 @@ import sessionRoutes from "./routes/session.js";
 import { verifyJWT } from "./middleware/verifyJWT.js";
 
 dotenv.config({ path: '../.env' });
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 
 const app = express();
 
@@ -36,7 +36,7 @@ const server = createServer(app);
 const allowedOrigins = [
   "http://localhost:5173",
   "http://35.233.161.58",  // Add your actual LoadBalancer IP here
-  "http://34.168.46.139"   // Add any other IPs you might be using
+  "https://team4.cs144.org"   // Add any other IPs you might be using
 ].filter(Boolean);
 
 app.use(

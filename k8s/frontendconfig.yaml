@@ -6,4 +6,3 @@ spec:
   redirectToHttps:
     enabled: true
     responseCodeName: "301"
-  sslPolicy: "oversea-ssl-policy"  # Optional: remove if you don't have SSL policy

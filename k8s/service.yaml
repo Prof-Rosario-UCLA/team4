@@ -1,16 +1,20 @@
-# k8s/service.yaml
 apiVersion: v1
 kind: Service
 metadata:
   name: oversea-service
+  annotations:
+    cloud.google.com/neg: '{"ingress": true}'
+    cloud.google.com/backend-config: '{"default": "oversea-backend-config"}'
 spec:
+  type: NodePort  # Changed from LoadBalancer
   selector:
     app: oversea-app
   ports:
   - name: web
     port: 80
     targetPort: 3000
+    protocol: TCP
   - name: ai
     port: 8000
     targetPort: 8000
-  type: LoadBalancer
+    protocol: TCP
