@@ -36,7 +36,7 @@ const server = createServer(app);
 const allowedOrigins = [
   "http://localhost:5173",
   "http://35.233.161.58",  // Add your actual LoadBalancer IP here
-  "https://team4.cs144.org"   // Add any other IPs you might be using
+  "http://team4.cs144.org"   // Add any other IPs you might be using
 ].filter(Boolean);
 
 app.use(

@@ -3,7 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import useAuth from "../hooks/useAuth";
 
 const BASE_URL = import.meta.env.PROD
-  ? 'https://team4.cs144.org'
+  ? 'http://team4.cs144.org'
   : 'http://localhost:3000';
 const socket = io.connect(BASE_URL);
 
