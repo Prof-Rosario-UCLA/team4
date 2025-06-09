@@ -9,5 +9,5 @@ spec:
     healthyThreshold: 2
     unhealthyThreshold: 3
     type: HTTP
-    requestPath: /
+    requestPath: /health  # Changed to /health endpoint
     port: 3000

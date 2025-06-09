@@ -4,5 +4,5 @@ metadata:
   name: oversea-frontend-config
 spec:
   redirectToHttps:
-    enabled: true
+    enabled: false
     responseCodeName: "301"

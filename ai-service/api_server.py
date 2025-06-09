@@ -47,6 +47,7 @@ redis_client = redis.Redis(
 
 # API setup
 app = FastAPI()
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"], # Replace * later with specific domain name
