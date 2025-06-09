@@ -1,0 +1,100 @@
+name: Deploy to GKE (Workload Identity)
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  PROJECT_ID: cs144-25s-jlin18
+  GAR_LOCATION: us-west1
+  GKE_CLUSTER: your-cluster-name
+  GKE_ZONE: us-west1-a
+  DEPLOYMENT_NAME: oversea-app
+  REPOSITORY: oversea-app
+  IMAGE: oversea-app
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '23'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm install
+          cd client && npm ci
+          cd ../server && npm ci
+
+      - name: Run tests
+        run: npm run test
+
+  build-and-deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    environment: production
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - id: 'auth'
+        name: 'Authenticate to Google Cloud'
+        uses: 'google-github-actions/auth@v2'
+        with:
+          workload_identity_provider: '${{ secrets.WIF_PROVIDER }}'
+          service_account: '${{ secrets.WIF_SERVICE_ACCOUNT }}'
+
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v2'
+
+      - name: 'Configure Docker to use gcloud as a credential helper'
+        run: |
+          gcloud auth configure-docker $GAR_LOCATION-docker.pkg.dev
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build application
+        run: make build
+
+      - name: Build and Push Container
+        run: |-
+          docker buildx build \
+            --platform linux/amd64 \
+            --tag "$GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE:latest" \
+            --tag "$GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE:$GITHUB_SHA" \
+            --push \
+            .
+
+      - name: Get GKE credentials
+        uses: google-github-actions/get-gke-credentials@v2
+        with:
+          cluster_name: ${{ env.GKE_CLUSTER }}
+          location: ${{ env.GKE_ZONE }}
+
+      - name: Update deployment image
+        run: |-
+          kubectl set image deployment/$DEPLOYMENT_NAME \
+            $DEPLOYMENT_NAME=$GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE:$GITHUB_SHA
+
+      - name: Restart deployment
+        run: |-
+          kubectl rollout restart deployment/$DEPLOYMENT_NAME
+
+      - name: Verify deployment
+        run: |-
+          kubectl rollout status deployment/$DEPLOYMENT_NAME
+          kubectl get services -o wide

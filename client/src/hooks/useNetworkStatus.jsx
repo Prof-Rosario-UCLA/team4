@@ -8,7 +8,7 @@ export const useNetworkStatus = () => {
     const checkConnection = async () => {
       try {
         // Try to fetch from your API endpoint instead
-        const response = await fetch('/api/health', { 
+        await fetch('/api/health', { 
           method: 'HEAD',
           mode: 'no-cors' 
         });
@@ -18,6 +18,7 @@ export const useNetworkStatus = () => {
         if (!navigator.onLine) {
           setIsOnline(false);
         }
+        console.log("Error message from checkConnection for network status: ", error);
       }
     };
     

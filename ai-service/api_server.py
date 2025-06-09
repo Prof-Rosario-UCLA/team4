@@ -50,7 +50,13 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Replace * later with specific domain name
+    allow_origins=[
+        "http://localhost:5173",
+        "http://localhost:3000", 
+        "http://34.105.109.10",      # Your production IP
+        "http://team4.cs144.org",    # Your domain
+        "https://team4.cs144.org"    # HTTPS version
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"]
