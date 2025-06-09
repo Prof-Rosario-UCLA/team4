@@ -1,9 +1,9 @@
+// client/vite.config.js
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { VitePWA } from "vite-plugin-pwa";
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [
     react(),
@@ -39,8 +39,7 @@ export default defineConfig({
         globPatterns: ["**/*.{js,css,html,ico,png,svg}"],
         runtimeCaching: [
           {
-            // API calls - Network First
-            urlPattern: /^https:\/\/localhost:3000\/api\/.*/i,
+            urlPattern: /^https:\/\/.*\/api\/.*/i,
             handler: "NetworkFirst",
             options: {
               cacheName: "api-cache",
@@ -51,14 +50,13 @@ export default defineConfig({
             },
           },
           {
-            // Static assets - Cache First
             urlPattern: /\.(?:png|jpg|jpeg|svg|gif)$/,
             handler: "CacheFirst",
             options: {
               cacheName: "static-assets",
               expiration: {
                 maxEntries: 100,
-                maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
+                maxAgeSeconds: 30 * 24 * 60 * 60,
               },
             },
           },
@@ -66,4 +64,13 @@ export default defineConfig({
       },
     }),
   ],
+  // ✅ Target modern browsers that support crypto.randomUUID
+  build: {
+    target: ['chrome92', 'firefox95', 'safari15.4', 'edge92'],
+    // Alternative: target: 'esnext' for cutting-edge features
+  },
+  // ✅ Set modern browser support
+  esbuild: {
+    target: 'es2022'
+  }
 });
