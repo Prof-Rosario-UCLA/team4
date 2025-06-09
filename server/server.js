@@ -6,7 +6,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { createServer } from "http";
 import { Server } from "socket.io";
-import { createProxyMiddleware } from 'http-proxy-middleware';
+import { createProxyMiddleware } from "http-proxy-middleware";
 
 import { connectDB } from "./config/db.js";
 import { connectRedis } from "./config/db.js";
@@ -20,7 +20,7 @@ import chatHistoryRoutes from "./routes/chatHistory.js";
 import sessionRoutes from "./routes/session.js";
 import { verifyJWT } from "./middleware/verifyJWT.js";
 
-dotenv.config({ path: '../.env' });
+dotenv.config({ path: "../.env" });
 const PORT = process.env.PORT || 3000;
 
 const app = express();
@@ -36,59 +36,55 @@ const server = createServer(app);
 // Update the allowedOrigins array in server.js
 const allowedOrigins = [
   "http://localhost:5173",
-  "http://34.105.109.10",      // Add your LoadBalancer IP
-  "http://35.233.161.58",       // Keep any other IPs
-  "http://team4.cs144.org",     // Your domain
-  "https://team4.cs144.org"     // HTTPS version
+  "http://34.105.109.10", // Add your LoadBalancer IP
+  "http://35.233.161.58", // Keep any other IPs
 ].filter(Boolean);
 
-// Update CORS middleware to be more permissive for testing
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      // Allow requests with no origin (like mobile apps or curl request)
-      if (!origin) return callback(null, true);
+function checkOrigin(origin, callback) {
+  if (!origin) return callback(null, true); // Allow non-browser requests (like curl)
+  if (allowedOrigins.includes(origin)) return callback(null, true);
 
-      // In production, you might want to be more permissive temporarily
-      if (process.env.NODE_ENV === 'production') {
-        // Allow any origin in production for testing
-        return callback(null, true);
-      }
+  // Allow any subdomain + http/https for team4.cs144.org
+  if (/^https?:\/\/([a-zA-Z0-9-]+\.)*team4\.cs144\.org(:\d+)?$/.test(origin)) {
+    return callback(null, true);
+  }
+  return callback(new Error("Not allowed by CORS"));
+}
 
-      if (allowedOrigins.indexOf(origin) !== -1) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true,
-  })
-);
+const corsOptions = {
+  origin: checkOrigin,
+  credentials: true, // if you use cookies/auth
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
 
 // Health check endpoint for the Node.js server
 app.get("/health", (req, res) => {
-  res.status(200).json({ 
-    status: "healthy", 
+  res.status(200).json({
+    status: "healthy",
     service: "oversea-server",
-    timestamp: new Date().toISOString() 
+    timestamp: new Date().toISOString(),
   });
 });
 
 // Proxy AI service requests - Fixed routing
-app.use('/chat', createProxyMiddleware({
-  target: 'http://localhost:8000',
-  changeOrigin: true,
-  // Remove pathRewrite entirely - let it pass through as-is
-  onProxyReq: (proxyReq, req, res) => {
-    console.log(`Proxying ${req.method} ${req.path} to AI service`);
-  },
-  onError: (err, req, res) => {
-    console.error('Proxy Error:', err);
-    res.status(500).json({ error: 'Failed to connect to AI service' });
-  }
-}));
+app.use(
+  "/chat",
+  createProxyMiddleware({
+    target: "http://localhost:8000",
+    changeOrigin: true,
+    // Remove pathRewrite entirely - let it pass through as-is
+    onProxyReq: (proxyReq, req, res) => {
+      console.log(`Proxying ${req.method} ${req.path} to AI service`);
+    },
+    onError: (err, req, res) => {
+      console.error("Proxy Error:", err);
+      res.status(500).json({ error: "Failed to connect to AI service" });
+    },
+  })
+);
 
 // Add this BEFORE the verifyJWT middleware in server.js
 
@@ -99,7 +95,7 @@ app.get("/api/health", (req, res) => {
 
 // Also update the root endpoint to handle both GET and HEAD
 app.all("/", (req, res) => {
-  if (req.method === 'HEAD') {
+  if (req.method === "HEAD") {
     res.status(200).end();
   } else {
     res.send("Server is ready");
@@ -127,16 +123,25 @@ const startServer = async () => {
   await connectRedis();
   server.listen(PORT, () => {
     console.log(`Server started at http://localhost:${PORT}`);
-    console.log(`Proxying /chat requests to AI service at http://localhost:8000`);
+    console.log(
+      `Proxying /chat requests to AI service at http://localhost:8000`
+    );
   });
 };
 startServer();
 
 /* ----------------------------------------------Socket.io---------------------------------------------------*/
 const io = new Server(server, {
-  cors: { origin: allowedOrigins },
+  cors: {
+    origin: [
+      "http://localhost:5173",
+      "http://34.105.109.10",
+      "http://35.233.161.58",
+      /^https?:\/\/([a-zA-Z0-9-]+\.)*team4\.cs144\.org(:\d+)?$/, // regex allowed as of socket.io v4+
+    ],
+  },
   credentials: true,
-  transports: ['websocket', 'polling'],
+  transports: ["websocket", "polling"],
   pingTimeout: 60000,
   pingInterval: 25000,
 });
@@ -144,10 +149,10 @@ const io = new Server(server, {
 // Enhanced Socket.io connection handling
 io.on("connection", (socket) => {
   console.log(`Socket connected: ${socket.id}`);
-  
+
   socket.on("join_room", ({ username, room }) => {
     console.log(`${username} attempting to join room ${room}`);
-    
+
     if (socket.data.room) {
       socket.leave(socket.data.room);
       io.to(socket.data.room).emit(
@@ -172,7 +177,9 @@ io.on("connection", (socket) => {
 
   socket.on("chat_message", ({ message, room }) => {
     if (room && socket.data.username) {
-      console.log(`Message from ${socket.data.username} in room ${room}: ${message}`);
+      console.log(
+        `Message from ${socket.data.username} in room ${room}: ${message}`
+      );
       io.to(room).emit("chat_message", {
         username: socket.data.username,
         message,
@@ -183,7 +190,10 @@ io.on("connection", (socket) => {
   socket.on("disconnect", (reason) => {
     console.log(`Socket disconnected: ${socket.id}, reason: ${reason}`);
     if (socket.data.room && socket.data.username) {
-      io.to(socket.data.room).emit("system_message", `${socket.data.username} disconnected.`);
+      io.to(socket.data.room).emit(
+        "system_message",
+        `${socket.data.username} disconnected.`
+      );
     }
   });
 
