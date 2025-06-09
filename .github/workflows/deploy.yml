@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - single_container
   workflow_dispatch:
 
 env:
