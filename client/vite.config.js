@@ -9,7 +9,7 @@ export default defineConfig({
     react(),
     tailwindcss(),
     VitePWA({
-      registerType: "autoUpdate",
+      registerType: "prompt", // Changed from "autoUpdate" to "prompt"
       includeAssets: [
         "favicon.ico",
         "apple-touch-icon.png",
@@ -17,23 +17,39 @@ export default defineConfig({
         "pwa-512x512.png",
       ],
       manifest: {
-        name: "Oversea",
+        name: "Oversea - AI Travel Assistant",
         short_name: "Oversea",
-        description: "AI-Powered Travel Assistant",
+        description: "AI-Powered Travel Assistant for planning your perfect trip",
         theme_color: "#ffffff",
+        background_color: "#ffffff",
+        display: "standalone",
+        orientation: "portrait-primary",
+        scope: "/",
         start_url: "/agent",
+        categories: ["travel", "productivity"],
         icons: [
           {
             src: "pwa-192x192.png",
             sizes: "192x192",
             type: "image/png",
+            purpose: "any maskable"
           },
+          {
+            src: "pwa-512x512.png",
+            sizes: "512x512",c
+            type: "image/png",
+            purpose: "any maskable"
+          },
+        ],
+        screenshots: [
           {
             src: "pwa-512x512.png",
             sizes: "512x512",
             type: "image/png",
-          },
-        ],
+            form_factor: "wide",
+            label: "Oversea Travel Assistant"
+          }
+        ]
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg}"],
@@ -62,15 +78,9 @@ export default defineConfig({
           },
         ],
       },
+      devOptions: {
+        enabled: true // Enable PWA in development
+      }
     }),
   ],
-  // ✅ Target modern browsers that support crypto.randomUUID
-  build: {
-    target: ['chrome92', 'firefox95', 'safari15.4', 'edge92'],
-    // Alternative: target: 'esnext' for cutting-edge features
-  },
-  // ✅ Set modern browser support
-  esbuild: {
-    target: 'es2022'
-  }
 });

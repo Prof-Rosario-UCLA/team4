@@ -140,7 +140,13 @@ const AgentChatPage = () => {
         userInput.length > 30 ? userInput.substring(0, 30) + "..." : userInput;
 
       // Generate new session id
-      const newSessionId = crypto.randomUUID();
+      const newSessionId =
+        crypto?.randomUUID?.() ||
+        "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+          const r = (Math.random() * 16) | 0;
+          const v = c === "x" ? r : (r & 0x3) | 0x8;
+          return v.toString(16);
+        });
 
       // Create new session object
       const newSession = {
@@ -275,7 +281,9 @@ const AgentChatPage = () => {
   return (
     <div
       className={`w-full mx-auto ${
-        !sessionId ? "h-full flex flex-col items-center justify-center" : "max-w-3xl"
+        !sessionId
+          ? "h-full flex flex-col items-center justify-center"
+          : "max-w-3xl"
       }`}
     >
       {sessionId ? (
