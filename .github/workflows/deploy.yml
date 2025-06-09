@@ -1,4 +1,4 @@
-name: Deploy to GKE (Workload Identity)
+name: Deploy to GKE
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
 env:
   PROJECT_ID: cs144-25s-jlin18
   GAR_LOCATION: us-west1
-  GKE_CLUSTER: your-cluster-name
+  GKE_CLUSTER: cs144
   GKE_ZONE: us-west1-a
   DEPLOYMENT_NAME: oversea-app
   REPOSITORY: oversea-app
