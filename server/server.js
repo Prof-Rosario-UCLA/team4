@@ -28,7 +28,6 @@ const app = express();
 // Fix for ES Modules (no __dirname)
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-app.use(express.static(path.join(__dirname, "public")));
 
 const server = createServer(app);
 
@@ -90,8 +89,6 @@ app.use('/chat', createProxyMiddleware({
   }
 }));
 
-// Add this BEFORE the verifyJWT middleware in server.js
-
 // Health check endpoint (no auth required)
 app.get("/api/health", (req, res) => {
   res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
@@ -106,20 +103,20 @@ app.all("/", (req, res) => {
   }
 });
 
-// Routes
+// PUBLIC API Routes (NO AUTH REQUIRED)
 app.use("/api/register", registerRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/refresh", refreshRoutes);
 app.use("/api/logout", logoutRoutes);
 
-app.use(verifyJWT);
-app.use("/api/user", userRoutes);
-app.use("/api/chatHistory", chatHistoryRoutes);
-app.use("/api/session", sessionRoutes);
+// Serve static files from React build
+app.use(express.static(path.join(__dirname, "public")));
 
-app.get("/", (req, res) => {
-  res.send("Server is ready");
-});
+// PROTECTED API Routes (AUTH REQUIRED) - Apply verifyJWT per route instead of globally
+app.use("/api/user", verifyJWT, userRoutes);
+app.use("/api/chatHistory", verifyJWT, chatHistoryRoutes);
+app.use("/api/session", verifyJWT, sessionRoutes);
+
 
 // Async so server starts after DB/Redis connected
 const startServer = async () => {
