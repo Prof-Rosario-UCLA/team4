@@ -18,7 +18,7 @@ import redis.asyncio as redis
 from typing import Optional, List
 
 # Load environment variables
-load_dotenv()
+load_dotenv(dotenv_path="../.env")
 
 
 # -------------------------------------------------------------Database Setup------------------------------------------------------------
@@ -37,8 +37,9 @@ msg_collection = db["Messages"]
 redis_client = redis.Redis(
     host=os.getenv("REDIS_HOST", "localhost"),
     port=int(os.getenv("REDIS_PORT", 6379)),
+    password=os.getenv("REDIS_PASSWORD"),
     db=0,
-    decode_responses=False,
+    decode_responses=True,
     socket_connect_timeout=5,
     socket_keepalive=True,
     health_check_interval=30,
@@ -46,6 +47,7 @@ redis_client = redis.Redis(
 
 # API setup
 app = FastAPI()
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"], # Replace * later with specific domain name

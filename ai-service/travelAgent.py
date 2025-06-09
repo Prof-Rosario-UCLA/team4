@@ -31,7 +31,7 @@ from pydantic import BaseModel, ValidationError, Field
 # -------------------------------------------------------------Create the client and kernel------------------------------------------------------------
 
 # Loads the .env file and connects to Azure OpenAI endpoint 
-load_dotenv()
+load_dotenv(dotenv_path="../.env")
 
 # Initializes Semantic Kernel 
 kernel = Kernel()

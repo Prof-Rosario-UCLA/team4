@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
-import axios from "axios";
+import { axiosAI } from "../api/axios";
 import useAxiosPrivate from "../hooks/useAxiosPrivate.jsx";
 import UserInputBox from "../components/userInputBox";
 import useAuth from "../hooks/useAuth";
@@ -219,7 +219,7 @@ const AgentChatPage = () => {
       });
 
       // Send message to AI agent
-      const res = await axios.post("http://localhost:8000/chat", {
+      const res = await axiosAI.post("/chat", {
         message: userInput,
         session_id: activeSessionId,
       });

@@ -1,47 +1,20 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: redis-service
+  name: oversea-service
+  annotations:
+    cloud.google.com/neg: '{"ingress": true}'
+    cloud.google.com/backend-config: '{"default": "oversea-backend-config"}'
 spec:
+  type: LoadBalancer  # Changed from LoadBalancer
   selector:
-    app: redis
+    app: oversea-app
   ports:
-  - port: 6379
-    targetPort: 6379
-  type: ClusterIP
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: oversea-server-service
-spec:
-  selector:
-    app: oversea-server
-  ports:
-  - port: 3000
+  - name: web
+    port: 80
     targetPort: 3000
-  type: ClusterIP
----
-apiVersion: v1
-kind: Service
-metadata: 
-  name: oversea-ai-service-service
-spec: 
-  selector:
-    app: oversea-client
-  ports:
-  - port: 80
-    targetPort: 5173
-  type: ClusterIP
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: oversea-client-service
-spec:
-  selector:
-    app: oversea-client
-  ports:
-  - port: 80
-    targetPort: 5173
-  type: ClusterIP  # Changed from LoadBalancer to ClusterIP for Ingress
+    protocol: TCP
+  - name: ai
+    port: 8000
+    targetPort: 8000
+    protocol: TCP
