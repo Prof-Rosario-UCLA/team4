@@ -65,3 +65,28 @@ The separate Dockerfiles inside `client/`, `server/` and `ai-service/` have been
 docker build -t oversea-app .
 docker run -p 3000:3000 -p 8000:8000 --env-file .env oversea-app
 ```
+
+Build to GKE
+
+```bash
+docker buildx build --platform linux/amd64 \
+-t us-west1-docker.pkg.dev/cs144-25s-jlin18/oversea-app/oversea-app:latest \--push ./
+```
+
+Set image
+
+```bash
+kubectl set image deployment/oversea-app app=us-west1-docker.pkg.dev/cs144-25s-jlin18/oversea-app/oversea-app:latest
+```
+
+Rollout image
+
+```bash
+kubectl rollout restart deployment/oversea-app
+```
+
+Create secrets directly from .env file (if kubectl supports it)
+
+```bash
+kubectl create secret generic oversea-secrets --from-env-file=.env
+```
